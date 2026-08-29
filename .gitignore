@@ -1,0 +1,12 @@
+# OS cruft
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editor
+.vscode/
+*.swp
+
+# Duplicate downloads from repeated "Publish" clicks
+data (*).json
+data(*).json
