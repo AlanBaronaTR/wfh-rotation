@@ -298,7 +298,49 @@ function copyTeamsImage(){
   sel.addRange(range);
   if(btn){btn.innerHTML=ico('check',12)+' Selected! Press Ctrl+C';btn.style.background='#059669';btn.style.borderColor='#047857';setTimeout(function(){btn.innerHTML=ico('copy',12)+' Select for copy';btn.style.background='#5B21B6';btn.style.borderColor='#4C1D95';},4000);}
 }
+function setCopyMode(mode){copyMode=mode;render();}
+function dismissAlert(key){dismissedAlerts.add(key);var el=document.getElementById('alert-'+key);if(el)el.style.display='none';}
+// ===== VACATION LOG =====
+function stampVacation(entry,status){
+  var start=new Date(entry.start+'T12:00:00'),end=new Date(entry.end+'T12:00:00');
+  for(var d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
+    var dow=d.getDay();if(dow===0||dow===6)continue;
+    var dayIdx=dow-1;
+    var monday=new Date(d);monday.setDate(monday.getDate()-dayIdx);
+    var wk=dStr(monday);
+    if(!schedule[wk]){schedule[wk]={};MEMBERS.forEach(function(m){schedule[wk][m.id]=Array(5).fill('off');});}
+    if(schedule[wk][entry.id])schedule[wk][entry.id][dayIdx]=status;
+  }
+}
+function addVacation(){
+  var id=document.getElementById('vac-member').value;
+  var start=document.getElementById('vac-start').value;
+  var end=document.getElementById('vac-end').value||start;
+  var note=document.getElementById('vac-note').value.trim();
+  if(!id||!start)return;
+  if(end<start){alert('End date must be on or after start date.');return;}
+  var entry={id:id,start:start,end:end,note:note};
+  vacationLog.push(entry);
+  stampVacation(entry,'vacation');
+  document.getElementById('vac-note').value='';
+  document.getElementById('vac-end').value='';
+  render();
+}
+function removeVacation(idx){
+  var entry=vacationLog[idx];
+  if(!entry)return;
+  if(!confirm('Remove vacation for '+MEMBERS.find(function(m){return m.id===entry.id;}).first+' ('+entry.start+' to '+entry.end+')? Days will revert to office.'))return;
+  stampVacation(entry,'off');
+  vacationLog.splice(idx,1);
+  render();
+}
 function doDownload(){}
+function vacLabel(entry){
+  var m=MEMBERS.find(function(mm){return mm.id===entry.id;});
+  var fmt=function(ds){var p=ds.split('-');return parseInt(p[2])+'/'+parseInt(p[1]);};
+  var dateStr=entry.start===entry.end?fmt(entry.start):fmt(entry.start)+'\u2013'+fmt(entry.end);
+  return m.first+': '+dateStr+(entry.note?' ('+entry.note+')':'');
+}
 function vacStartChanged(){var s=document.getElementById('vac-start');var e=document.getElementById('vac-end');if(s.value&&!e.value)e.value=s.value;}
 function stLabel(st){return st==='wfh'||st==='shared'?'WFH':st==='vacation'?'Vacation':st==='sick'?'Sick':st==='holiday'?'Holiday':'Office';}
 function cellIcon(st){if(st==='wfh'||st==='shared')return ico('home',13);if(st==='vacation')return ico('beach',12);if(st==='sick')return ico('heartoff',12);if(st==='holiday')return ico('flag',12);return ico('briefcase',12);}
