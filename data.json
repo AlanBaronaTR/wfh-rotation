@@ -1,0 +1,2838 @@
+{
+  "schedule": {
+    "2026-08-18": {
+      "karen": [
+        "off",
+        "off",
+        "off",
+        "wfh",
+        "off"
+      ],
+      "mafe": [
+        "wfh",
+        "off",
+        "wfh",
+        "off",
+        "off"
+      ],
+      "carlos": [
+        "off",
+        "wfh",
+        "off",
+        "off",
+        "off"
+      ],
+      "miriam": [
+        "off",
+        "off",
+        "wfh",
+        "off",
+        "off"
+      ],
+      "alan": [
+        "off",
+        "wfh",
+        "off",
+        "wfh",
+        "off"
+      ],
+      "ricardo": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ]
+    },
+    "2026-08-24": {
+      "karen": [
+        "off",
+        "off",
+        "wfh",
+        "off",
+        "wfh"
+      ],
+      "mafe": [
+        "off",
+        "off",
+        "wfh",
+        "off",
+        "wfh"
+      ],
+      "carlos": [
+        "off",
+        "wfh",
+        "off",
+        "off",
+        "wfh"
+      ],
+      "miriam": [
+        "wfh",
+        "off",
+        "off",
+        "wfh",
+        "off"
+      ],
+      "ricardo": [
+        "off",
+        "wfh",
+        "off",
+        "wfh",
+        "off"
+      ],
+      "alan": [
+        "wfh",
+        "off",
+        "off",
+        "off",
+        "wfh"
+      ],
+      "perla": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo_int": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ]
+    },
+    "2026-09-07": {
+      "karen": [
+        "wfh",
+        "off",
+        "off",
+        "off",
+        "vacation"
+      ],
+      "mafe": [
+        "wfh",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "carlos": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "miriam": [
+        "off",
+        "vacation",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "alan": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "perla": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo_int": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ]
+    },
+    "2026-09-14": {
+      "karen": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "mafe": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "vacation"
+      ],
+      "carlos": [
+        "off",
+        "off",
+        "wfh",
+        "off",
+        "off"
+      ],
+      "miriam": [
+        "off",
+        "off",
+        "wfh",
+        "off",
+        "off"
+      ],
+      "ricardo": [
+        "vacation",
+        "vacation",
+        "vacation",
+        "vacation",
+        "vacation"
+      ],
+      "alan": [
+        "vacation",
+        "vacation",
+        "wfh",
+        "off",
+        "off"
+      ],
+      "perla": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo_int": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ]
+    },
+    "2026-08-03": {
+      "karen": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "wfh"
+      ],
+      "mafe": [
+        "wfh",
+        "off",
+        "off",
+        "off",
+        "wfh"
+      ],
+      "carlos": [
+        "wfh",
+        "off",
+        "off",
+        "off",
+        "wfh"
+      ],
+      "miriam": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "wfh"
+      ],
+      "alan": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "wfh"
+      ],
+      "ricardo": [
+        "wfh",
+        "off",
+        "off",
+        "off",
+        "wfh"
+      ],
+      "perla": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo_int": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ]
+    },
+    "2026-08-10": {
+      "karen": [
+        "wfh",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "mafe": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "wfh"
+      ],
+      "carlos": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "wfh"
+      ],
+      "miriam": [
+        "wfh",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "wfh"
+      ],
+      "alan": [
+        "wfh",
+        "off",
+        "off",
+        "off",
+        "wfh"
+      ],
+      "perla": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo_int": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ]
+    },
+    "2026-08-17": {
+      "karen": [
+        "wfh",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "mafe": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "wfh"
+      ],
+      "carlos": [
+        "wfh",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "miriam": [
+        "wfh",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "wfh"
+      ],
+      "alan": [
+        "wfh",
+        "off",
+        "off",
+        "off",
+        "wfh"
+      ],
+      "perla": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo_int": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ]
+    },
+    "2026-08-31": {
+      "karen": [
+        "off",
+        "wfh",
+        "off",
+        "wfh",
+        "off"
+      ],
+      "mafe": [
+        "wfh",
+        "off",
+        "off",
+        "wfh",
+        "off"
+      ],
+      "carlos": [
+        "wfh",
+        "off",
+        "wfh",
+        "off",
+        "off"
+      ],
+      "miriam": [
+        "off",
+        "off",
+        "wfh",
+        "off",
+        "wfh"
+      ],
+      "ricardo": [
+        "off",
+        "wfh",
+        "off",
+        "off",
+        "wfh"
+      ],
+      "alan": [
+        "wfh",
+        "off",
+        "off",
+        "off",
+        "wfh"
+      ],
+      "perla": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo_int": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ]
+    },
+    "2026-07-27": {
+      "karen": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "wfh"
+      ],
+      "mafe": [
+        "wfh",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "carlos": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "wfh"
+      ],
+      "miriam": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "wfh"
+      ],
+      "alan": [
+        "wfh",
+        "off",
+        "off",
+        "off",
+        "wfh"
+      ],
+      "ricardo": [
+        "wfh",
+        "off",
+        "off",
+        "off",
+        "off"
+      ]
+    },
+    "2026-07-20": {
+      "karen": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "wfh"
+      ],
+      "mafe": [
+        "wfh",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "carlos": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "wfh"
+      ],
+      "miriam": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "wfh"
+      ],
+      "alan": [
+        "wfh",
+        "off",
+        "off",
+        "off",
+        "wfh"
+      ],
+      "ricardo": [
+        "wfh",
+        "off",
+        "off",
+        "off",
+        "off"
+      ]
+    },
+    "2026-07-13": {
+      "karen": [
+        "vacation",
+        "off",
+        "off",
+        "wfh",
+        "off"
+      ],
+      "mafe": [
+        "off",
+        "wfh",
+        "off",
+        "off",
+        "off"
+      ],
+      "carlos": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "wfh"
+      ],
+      "miriam": [
+        "off",
+        "off",
+        "wfh",
+        "off",
+        "off"
+      ],
+      "alan": [
+        "wfh",
+        "wfh",
+        "wfh",
+        "wfh",
+        "wfh"
+      ],
+      "ricardo": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ]
+    },
+    "2026-07-06": {
+      "karen": [
+        "off",
+        "off",
+        "wfh",
+        "off",
+        "off"
+      ],
+      "mafe": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "wfh"
+      ],
+      "carlos": [
+        "off",
+        "wfh",
+        "off",
+        "off",
+        "off"
+      ],
+      "miriam": [
+        "vacation",
+        "off",
+        "off",
+        "wfh",
+        "off"
+      ],
+      "alan": [
+        "vacation",
+        "wfh",
+        "wfh",
+        "wfh",
+        "wfh"
+      ],
+      "ricardo": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ]
+    },
+    "2026-06-29": {
+      "karen": [
+        "off",
+        "wfh",
+        "off",
+        "off",
+        "off"
+      ],
+      "mafe": [
+        "off",
+        "wfh",
+        "off",
+        "off",
+        "off"
+      ],
+      "carlos": [
+        "off",
+        "off",
+        "wfh",
+        "off",
+        "off"
+      ],
+      "miriam": [
+        "wfh",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "alan": [
+        "off",
+        "wfh",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ]
+    },
+    "2026-06-22": {
+      "karen": [
+        "off",
+        "off",
+        "wfh",
+        "off",
+        "off"
+      ],
+      "mafe": [
+        "off",
+        "off",
+        "wfh",
+        "off",
+        "off"
+      ],
+      "carlos": [
+        "off",
+        "off",
+        "off",
+        "wfh",
+        "off"
+      ],
+      "miriam": [
+        "off",
+        "off",
+        "wfh",
+        "off",
+        "off"
+      ],
+      "alan": [
+        "wfh",
+        "off",
+        "wfh",
+        "wfh",
+        "off"
+      ],
+      "ricardo": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ]
+    },
+    "2026-06-01": {
+      "karen": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "mafe": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "carlos": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "miriam": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "alan": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ]
+    },
+    "2026-06-08": {
+      "karen": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "mafe": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "carlos": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "miriam": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "alan": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ]
+    },
+    "2026-06-15": {
+      "karen": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "mafe": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "carlos": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "miriam": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "alan": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ]
+    },
+    "2026-10-05": {
+      "karen": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "mafe": [
+        "vacation",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "carlos": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "miriam": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "vacation"
+      ],
+      "ricardo": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "alan": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "perla": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo_int": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ]
+    },
+    "2026-10-12": {
+      "karen": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "mafe": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "carlos": [
+        "vacation",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "miriam": [
+        "vacation",
+        "vacation",
+        "vacation",
+        "vacation",
+        "vacation"
+      ],
+      "ricardo": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "alan": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "perla": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo_int": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ]
+    },
+    "2026-09-21": {
+      "karen": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "mafe": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "carlos": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "miriam": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "alan": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "perla": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo_int": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ]
+    },
+    "2026-09-28": {
+      "karen": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "mafe": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "carlos": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "vacation"
+      ],
+      "miriam": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "alan": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "perla": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo_int": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ]
+    },
+    "2026-10-19": {
+      "karen": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "mafe": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "carlos": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "miriam": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "alan": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "perla": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo_int": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ]
+    },
+    "2026-10-26": {
+      "karen": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "mafe": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "carlos": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "miriam": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "alan": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "perla": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo_int": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ]
+    },
+    "2026-12-14": {
+      "karen": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "mafe": [
+        "off",
+        "off",
+        "off",
+        "vacation",
+        "vacation"
+      ],
+      "carlos": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "miriam": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "alan": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ]
+    },
+    "2026-12-21": {
+      "karen": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "mafe": [
+        "vacation",
+        "vacation",
+        "off",
+        "off",
+        "off"
+      ],
+      "carlos": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "miriam": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "alan": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ]
+    },
+    "2026-11-02": {
+      "karen": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "mafe": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "carlos": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "miriam": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "perla": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo_int": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "alan": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ]
+    },
+    "2026-11-09": {
+      "karen": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "mafe": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "carlos": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "miriam": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "perla": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo_int": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "alan": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ]
+    },
+    "2026-11-16": {
+      "karen": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "mafe": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "carlos": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "miriam": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "perla": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo_int": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "alan": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ]
+    },
+    "2026-11-23": {
+      "karen": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "mafe": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "carlos": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "vacation"
+      ],
+      "miriam": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "perla": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo_int": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "alan": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ]
+    },
+    "2026-11-30": {
+      "karen": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "mafe": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "carlos": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "miriam": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "perla": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo_int": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "alan": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ]
+    }
+  },
+  "holidays": {
+    "2026-06-29": [
+      {
+        "day": 4,
+        "name": "Independence Day observed"
+      }
+    ],
+    "2026-09-07": [
+      {
+        "day": 0,
+        "name": "Labor Day"
+      }
+    ],
+    "2026-09-14": [
+      {
+        "day": 2,
+        "name": "Mexico's Independence Day"
+      }
+    ],
+    "2026-08-24": [],
+    "2026-08-03": [],
+    "2026-08-10": [],
+    "2026-08-17": [],
+    "2026-08-31": [],
+    "2026-07-27": [],
+    "2026-07-20": [],
+    "2026-07-13": [],
+    "2026-07-06": [],
+    "2026-06-22": [],
+    "2026-06-01": [],
+    "2026-06-08": [],
+    "2026-06-15": [],
+    "2026-09-21": [],
+    "2026-09-28": [],
+    "2026-10-05": [],
+    "2026-10-12": [],
+    "2026-10-19": [],
+    "2026-10-26": [],
+    "2026-11-02": [],
+    "2026-11-09": [],
+    "2026-11-16": [],
+    "2026-11-23": [],
+    "2026-11-30": []
+  },
+  "weekShift": {
+    "2026-08-18": {
+      "karen": "10",
+      "mafe": "10",
+      "carlos": "10",
+      "miriam": "10",
+      "alan": "10",
+      "ricardo": "10"
+    },
+    "2026-08-24": {
+      "karen": "11",
+      "mafe": "10",
+      "carlos": "10",
+      "miriam": "10",
+      "ricardo": "11",
+      "alan": "10",
+      "perla": "10",
+      "ricardo_int": "10"
+    },
+    "2026-08-17": {
+      "karen": "10",
+      "mafe": "10",
+      "carlos": "11",
+      "miriam": "11",
+      "ricardo": "10",
+      "alan": "10",
+      "perla": "10",
+      "ricardo_int": "10"
+    },
+    "2026-08-10": {
+      "karen": "10",
+      "mafe": "11",
+      "carlos": "10",
+      "miriam": "10",
+      "ricardo": "11",
+      "alan": "10"
+    },
+    "2026-08-03": {
+      "karen": "11",
+      "mafe": "10",
+      "carlos": "11",
+      "miriam": "10",
+      "alan": "10",
+      "ricardo": "10"
+    },
+    "2026-07-27": {
+      "karen": "10",
+      "mafe": "10",
+      "carlos": "10",
+      "miriam": "11",
+      "alan": "11",
+      "ricardo": "10"
+    },
+    "2026-07-20": {
+      "karen": "10",
+      "mafe": "10",
+      "carlos": "10",
+      "miriam": "10",
+      "alan": "10",
+      "ricardo": "10"
+    },
+    "2026-07-13": {
+      "karen": "10",
+      "mafe": "10",
+      "carlos": "10",
+      "miriam": "10",
+      "alan": "10",
+      "ricardo": "10"
+    },
+    "2026-07-06": {
+      "karen": "10",
+      "mafe": "10",
+      "carlos": "10",
+      "miriam": "10",
+      "alan": "10",
+      "ricardo": "10"
+    },
+    "2026-06-29": {
+      "karen": "10",
+      "mafe": "10",
+      "carlos": "10",
+      "miriam": "10",
+      "alan": "10",
+      "ricardo": "10"
+    },
+    "2026-06-22": {
+      "karen": "10",
+      "mafe": "10",
+      "carlos": "10",
+      "miriam": "10",
+      "alan": "10",
+      "ricardo": "10"
+    },
+    "2026-08-31": {
+      "karen": "8",
+      "mafe": "10",
+      "carlos": "10",
+      "miriam": "10",
+      "ricardo": "8",
+      "alan": "10",
+      "perla": "10",
+      "ricardo_int": "10"
+    },
+    "2026-09-07": {
+      "karen": "8",
+      "mafe": "10",
+      "carlos": "10",
+      "miriam": "11",
+      "ricardo": "10",
+      "alan": "11"
+    },
+    "2026-09-14": {
+      "karen": "10",
+      "mafe": "10",
+      "carlos": "10",
+      "miriam": "11",
+      "ricardo": "10",
+      "alan": "11"
+    },
+    "2026-09-21": {
+      "karen": "10",
+      "mafe": "10",
+      "carlos": "10",
+      "miriam": "11",
+      "ricardo": "10",
+      "alan": "11"
+    },
+    "2026-09-28": {
+      "karen": "10",
+      "mafe": "10",
+      "carlos": "10",
+      "miriam": "11",
+      "ricardo": "10",
+      "alan": "11"
+    },
+    "2026-10-05": {
+      "karen": "10",
+      "mafe": "10",
+      "carlos": "10",
+      "miriam": "11",
+      "ricardo": "10",
+      "alan": "11"
+    },
+    "2026-10-12": {
+      "karen": "10",
+      "mafe": "10",
+      "carlos": "10",
+      "miriam": "11",
+      "ricardo": "10",
+      "alan": "11"
+    },
+    "2026-10-19": {
+      "karen": "10",
+      "mafe": "10",
+      "carlos": "10",
+      "miriam": "11",
+      "ricardo": "10",
+      "alan": "11"
+    },
+    "2026-10-26": {
+      "karen": "10",
+      "mafe": "10",
+      "carlos": "10",
+      "miriam": "11",
+      "ricardo": "10",
+      "alan": "11"
+    },
+    "2026-11-02": {
+      "karen": "10",
+      "mafe": "10",
+      "carlos": "10",
+      "miriam": "11",
+      "ricardo": "10",
+      "alan": "11"
+    },
+    "2026-11-09": {
+      "karen": "10",
+      "mafe": "10",
+      "carlos": "10",
+      "miriam": "11",
+      "ricardo": "10",
+      "alan": "11"
+    },
+    "2026-11-16": {
+      "karen": "10",
+      "mafe": "10",
+      "carlos": "10",
+      "miriam": "11",
+      "ricardo": "10",
+      "alan": "11"
+    },
+    "2026-11-23": {
+      "karen": "10",
+      "mafe": "10",
+      "carlos": "10",
+      "miriam": "11",
+      "ricardo": "10",
+      "alan": "11"
+    },
+    "2026-11-30": {
+      "karen": "8",
+      "mafe": "10",
+      "carlos": "8",
+      "miriam": "10",
+      "ricardo": "8",
+      "alan": "10"
+    }
+  },
+  "shiftOv": {
+    "2026-08-24": {
+      "karen": [
+        null,
+        null,
+        null,
+        "10",
+        "10"
+      ],
+      "mafe": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "carlos": [
+        null,
+        null,
+        null,
+        "11",
+        null
+      ],
+      "miriam": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "ricardo": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "alan": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "perla": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "ricardo_int": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "2026-07-20": {
+      "karen": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "mafe": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "carlos": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "miriam": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "alan": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "ricardo": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "2026-07-27": {
+      "karen": [
+        null,
+        null,
+        null,
+        "11",
+        null
+      ],
+      "mafe": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "carlos": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "miriam": [
+        null,
+        null,
+        null,
+        "10",
+        null
+      ],
+      "alan": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "ricardo": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "2026-08-03": {
+      "karen": [
+        null,
+        null,
+        null,
+        "10",
+        null
+      ],
+      "mafe": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "carlos": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "miriam": [
+        null,
+        null,
+        null,
+        "11",
+        null
+      ],
+      "alan": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "ricardo": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "2026-08-10": {
+      "karen": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "mafe": [
+        null,
+        null,
+        null,
+        "10",
+        null
+      ],
+      "carlos": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "miriam": [
+        null,
+        null,
+        null,
+        "11",
+        null
+      ],
+      "ricardo": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "alan": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "2026-08-17": {
+      "karen": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "mafe": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "carlos": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "miriam": [
+        null,
+        null,
+        null,
+        null,
+        "10"
+      ],
+      "ricardo": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "alan": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "perla": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "ricardo_int": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "2026-08-31": {
+      "karen": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "mafe": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "carlos": [
+        null,
+        "8",
+        "8",
+        "8",
+        "8"
+      ],
+      "miriam": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "ricardo": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "alan": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "perla": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "ricardo_int": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "2026-09-07": {
+      "karen": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "mafe": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "carlos": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "miriam": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "ricardo": [
+        "11",
+        null,
+        null,
+        null,
+        null
+      ],
+      "alan": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "2026-09-14": {
+      "karen": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "mafe": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "carlos": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "miriam": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "ricardo": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "alan": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "2026-09-21": {
+      "karen": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "mafe": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "carlos": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "miriam": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "ricardo": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "alan": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "2026-09-28": {
+      "karen": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "mafe": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "carlos": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "miriam": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "ricardo": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "alan": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "2026-10-05": {
+      "karen": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "mafe": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "carlos": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "miriam": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "ricardo": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "alan": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "2026-10-12": {
+      "karen": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "mafe": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "carlos": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "ricardo": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "alan": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "2026-10-19": {
+      "karen": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "mafe": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "carlos": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "miriam": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "ricardo": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "alan": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "2026-10-26": {
+      "karen": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "mafe": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "carlos": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "miriam": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "ricardo": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "alan": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "2026-11-02": {
+      "karen": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "mafe": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "carlos": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "miriam": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "ricardo": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "alan": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "2026-11-09": {
+      "karen": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "mafe": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "carlos": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "miriam": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "ricardo": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "alan": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "2026-11-16": {
+      "karen": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "mafe": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "carlos": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "miriam": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "ricardo": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "alan": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "2026-11-23": {
+      "karen": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "mafe": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "carlos": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "miriam": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "ricardo": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "alan": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "2026-11-30": {
+      "karen": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "mafe": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "carlos": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "miriam": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "ricardo": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "alan": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  },
+  "notes": {
+    "note_week_2026-07-20": "Earnings season begins.",
+    "dn_2026-08-03_karen_3": "Leaving at 4:30 p.m.",
+    "dn_2026-08-17_ricardo_2": "Logged in 1.30 hours late. From home instead of office. Without notifying"
+  },
+  "lockedWeeks": [
+    "2026-08-03",
+    "2026-08-10",
+    "2026-08-17",
+    "2026-07-27",
+    "2026-07-20",
+    "2026-07-13",
+    "2026-07-06",
+    "2026-06-29",
+    "2026-06-22",
+    "2026-06-15",
+    "2026-06-08",
+    "2026-06-01",
+    "2026-08-24"
+  ],
+  "vacationLog": [
+    {
+      "id": "mafe",
+      "start": "2026-12-17",
+      "end": "2026-12-22",
+      "note": ""
+    },
+    {
+      "id": "carlos",
+      "start": "2026-10-09",
+      "end": "2026-10-12",
+      "note": "Oct 9 (comp for mental health day), Oct 12 (birthday leave)"
+    },
+    {
+      "id": "alan",
+      "start": "2026-09-14",
+      "end": "2026-09-15",
+      "note": "I'll work on Sept. 16"
+    },
+    {
+      "id": "karen",
+      "start": "2026-09-11",
+      "end": "2026-09-11",
+      "note": "Comp. for Sept. 7"
+    },
+    {
+      "id": "mafe",
+      "start": "2026-09-18",
+      "end": "2026-09-18",
+      "note": "Comp. for Sept. 7"
+    },
+    {
+      "id": "miriam",
+      "start": "2026-09-08",
+      "end": "2026-09-08",
+      "note": "Comp. for Sept. 16"
+    },
+    {
+      "id": "carlos",
+      "start": "2026-10-02",
+      "end": "2026-10-02",
+      "note": "Comp. for Sept. 16"
+    },
+    {
+      "id": "miriam",
+      "start": "2026-10-09",
+      "end": "2026-10-16",
+      "note": ""
+    },
+    {
+      "id": "mafe",
+      "start": "2026-10-05",
+      "end": "2026-10-05",
+      "note": "Birthday leave"
+    },
+    {
+      "id": "ricardo",
+      "start": "2026-09-14",
+      "end": "2026-09-18",
+      "note": "Sept. 16 - official holiday"
+    },
+    {
+      "id": "carlos",
+      "start": "2026-11-27",
+      "end": "2026-11-27",
+      "note": ""
+    }
+  ],
+  "hiddenMembers": [
+    "perla",
+    "ricardo_int"
+  ],
+  "shiftTZ": "mx"
+}
