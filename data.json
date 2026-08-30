@@ -1574,18 +1574,6 @@
     }
   },
   "holidays": {
-    "2026-06-29": [
-      {
-        "day": 4,
-        "name": "Independence Day observed"
-      }
-    ],
-    "2026-09-07": [
-      {
-        "day": 0,
-        "name": "Labor Day"
-      }
-    ],
     "2026-09-14": [
       {
         "day": 2,
