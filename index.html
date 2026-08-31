@@ -132,7 +132,9 @@ var AVATAR_PALETTE=[
 // not this one), but must NOT count toward this team's desk limit (they're not in one of our seats).
 var DAYS=['Mon','Tue','Wed','Thu','Fri'],CYCLE=['off','wfh','vacation','sick','otherteam'],MANDATE=3;
 var view='week',wkOffset=0,monthOffset=0,suggestedOffset=null,showExport=false,showCopy=false,showTeams=false,copyMode='sheet',teamsDark=true;
-var lockedWeeks=new Set(),undoStack=[],notes={},weekShift={},shiftOv={},schedule={},holidays={},dismissedAlerts=new Set(),vacationLog=[],hiddenMembers=new Set();
+// hiddenByWeek: {[wkKey]: [memberId, ...]} — hiding is a per-week view/declutter choice, not a
+// schedule change, so it must NOT carry over to other weeks (unlike hiddenMembers used to).
+var lockedWeeks=new Set(),undoStack=[],notes={},weekShift={},shiftOv={},schedule={},holidays={},dismissedAlerts=new Set(),vacationLog=[],hiddenByWeek={};
 var lastPublishedAt=null,publishLog=[],UNPUBLISHED_BASELINE=null;
 
 function getMonday(o){var d=new Date(),dow=d.getDay();var diff=d.getDate()-dow+(dow===0?-6:1)+o*7;return new Date(new Date().setDate(diff));}
@@ -199,8 +201,8 @@ if(!schedule['2026-08-24'])schedule['2026-08-24']={
 // ===== PERSISTENCE (localStorage) =====
 var STORAGE_KEY='wfh_rotation_mx_desk';
 function saveState(){try{var state=exportState();localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(e){}}
-function exportState(){return{members:MEMBERS,schedule:schedule,holidays:holidays,weekShift:weekShift,shiftOv:shiftOv,notes:notes,lockedWeeks:Array.from(lockedWeeks),vacationLog:vacationLog,hiddenMembers:Array.from(hiddenMembers),shiftTZ:shiftTZ,publishedAt:lastPublishedAt,publishLog:publishLog};}
-function applyState(state){if(!state)return;if(state.members&&state.members.length)MEMBERS=state.members;if(state.schedule)Object.assign(schedule,state.schedule);if(state.holidays)Object.assign(holidays,state.holidays);if(state.weekShift){Object.assign(weekShift,state.weekShift);Object.keys(weekShift).forEach(function(wk){Object.keys(weekShift[wk]).forEach(function(mid){weekShift[wk][mid]=migrateShift(weekShift[wk][mid]);});});}if(state.shiftOv){Object.assign(shiftOv,state.shiftOv);Object.keys(shiftOv).forEach(function(wk){Object.keys(shiftOv[wk]).forEach(function(mid){if(Array.isArray(shiftOv[wk][mid]))shiftOv[wk][mid]=shiftOv[wk][mid].map(function(v){return v?migrateShift(v):v;});});});}if(state.notes)Object.assign(notes,state.notes);if(state.lockedWeeks)state.lockedWeeks.forEach(function(k){lockedWeeks.add(k);});if(state.vacationLog)vacationLog=state.vacationLog;if(state.hiddenMembers)state.hiddenMembers.forEach(function(k){hiddenMembers.add(k);});if(state.shiftTZ)shiftTZ=state.shiftTZ;if(state.publishedAt)lastPublishedAt=state.publishedAt;if(state.publishLog)publishLog=state.publishLog;}
+function exportState(){return{members:MEMBERS,schedule:schedule,holidays:holidays,weekShift:weekShift,shiftOv:shiftOv,notes:notes,lockedWeeks:Array.from(lockedWeeks),vacationLog:vacationLog,hiddenByWeek:hiddenByWeek,shiftTZ:shiftTZ,publishedAt:lastPublishedAt,publishLog:publishLog};}
+function applyState(state){if(!state)return;if(state.members&&state.members.length)MEMBERS=state.members;if(state.schedule)Object.assign(schedule,state.schedule);if(state.holidays)Object.assign(holidays,state.holidays);if(state.weekShift){Object.assign(weekShift,state.weekShift);Object.keys(weekShift).forEach(function(wk){Object.keys(weekShift[wk]).forEach(function(mid){weekShift[wk][mid]=migrateShift(weekShift[wk][mid]);});});}if(state.shiftOv){Object.assign(shiftOv,state.shiftOv);Object.keys(shiftOv).forEach(function(wk){Object.keys(shiftOv[wk]).forEach(function(mid){if(Array.isArray(shiftOv[wk][mid]))shiftOv[wk][mid]=shiftOv[wk][mid].map(function(v){return v?migrateShift(v):v;});});});}if(state.notes)Object.assign(notes,state.notes);if(state.lockedWeeks)state.lockedWeeks.forEach(function(k){lockedWeeks.add(k);});if(state.vacationLog)vacationLog=state.vacationLog;if(state.hiddenByWeek){Object.assign(hiddenByWeek,state.hiddenByWeek);}else if(state.hiddenMembers&&state.hiddenMembers.length){var curWk0=wkKey(0);if(!hiddenByWeek[curWk0])hiddenByWeek[curWk0]=[];state.hiddenMembers.forEach(function(mid){if(!hiddenByWeek[curWk0].includes(mid))hiddenByWeek[curWk0].push(mid);});}if(state.shiftTZ)shiftTZ=state.shiftTZ;if(state.publishedAt)lastPublishedAt=state.publishedAt;if(state.publishLog)publishLog=state.publishLog;}
 // ===== UNPUBLISHED-CHANGES DETECTION =====
 // A content fingerprint of the real schedule data, deliberately excluding anything that gets
 // lazily auto-filled with defaults just by *viewing* a week (e.g. getSched()/getWeekShift()
@@ -210,7 +212,8 @@ function normalizedScheduleForFingerprint(){var out={};Object.keys(schedule).for
 function normalizedHolidaysForFingerprint(){var out={};Object.keys(holidays).forEach(function(wk){if(holidays[wk]&&holidays[wk].length)out[wk]=holidays[wk];});return out;}
 function normalizedWeekShiftForFingerprint(){var out={};Object.keys(weekShift).forEach(function(wk){var wentry=weekShift[wk],hasCustom=false;Object.keys(wentry).forEach(function(id){var mem=MEMBERS.find(function(mm){return mm.id===id;}),base=(mem&&mem.shift)||'10';if(migrateShift(wentry[id])!==base)hasCustom=true;});if(hasCustom)out[wk]=wentry;});return out;}
 function normalizedShiftOvForFingerprint(){var out={};Object.keys(shiftOv).forEach(function(wk){var wentry=shiftOv[wk],hasOv=false;Object.keys(wentry).forEach(function(id){(wentry[id]||[]).forEach(function(v){if(v)hasOv=true;});});if(hasOv)out[wk]=wentry;});return out;}
-function dataFingerprint(){return JSON.stringify({members:MEMBERS,schedule:normalizedScheduleForFingerprint(),holidays:normalizedHolidaysForFingerprint(),weekShift:normalizedWeekShiftForFingerprint(),shiftOv:normalizedShiftOvForFingerprint(),notes:notes,lockedWeeks:Array.from(lockedWeeks).sort(),vacationLog:vacationLog,hiddenMembers:Array.from(hiddenMembers).sort(),shiftTZ:shiftTZ});}
+function normalizedHiddenByWeekForFingerprint(){var out={};Object.keys(hiddenByWeek).forEach(function(wk){if(hiddenByWeek[wk]&&hiddenByWeek[wk].length)out[wk]=hiddenByWeek[wk].slice().sort();});return out;}
+function dataFingerprint(){return JSON.stringify({members:MEMBERS,schedule:normalizedScheduleForFingerprint(),holidays:normalizedHolidaysForFingerprint(),weekShift:normalizedWeekShiftForFingerprint(),shiftOv:normalizedShiftOvForFingerprint(),notes:notes,lockedWeeks:Array.from(lockedWeeks).sort(),vacationLog:vacationLog,hiddenByWeek:normalizedHiddenByWeekForFingerprint(),shiftTZ:shiftTZ});}
 function hasUnpublishedChanges(){return UNPUBLISHED_BASELINE!==null&&dataFingerprint()!==UNPUBLISHED_BASELINE;}
 function loadState(){try{var raw=localStorage.getItem(STORAGE_KEY);if(!raw)return;applyState(JSON.parse(raw));}catch(e){}}
 function resetState(){if(confirm('Reset all data to defaults? This clears all your saved schedules, holidays, notes, and shifts.')){localStorage.removeItem(STORAGE_KEY);location.reload();}}
@@ -263,9 +266,11 @@ function getSched(o){var k=wkKey(o);if(!schedule[k]){schedule[k]={};MEMBERS.forE
 function getHols(o){var k=wkKey(o);if(!holidays[k])holidays[k]=[];return holidays[k];}
 function isLocked(o){return lockedWeeks.has(wkKey(o));}
 function isScheduled(o){var k=wkKey(o);return!!schedule[k]&&MEMBERS.some(function(m){return memberInWeek(m.id,o)&&schedule[k][m.id]&&schedule[k][m.id].some(function(s){return s==='wfh';});});}
-function activeMembers(o){if(o===undefined)o=(view==='week'?wkOffset:0);return MEMBERS.filter(function(m){return memberInWeek(m.id,o)&&!hiddenMembers.has(m.id);});}
+function isHiddenInWeek(id,o){var wk=wkKey(o);return!!(hiddenByWeek[wk]&&hiddenByWeek[wk].includes(id));}
+function activeMembers(o){if(o===undefined)o=(view==='week'?wkOffset:0);return MEMBERS.filter(function(m){return memberInWeek(m.id,o)&&!isHiddenInWeek(m.id,o);});}
 function allActiveMembers(o){if(o===undefined)o=(view==='week'?wkOffset:0);return MEMBERS.filter(function(m){return memberInWeek(m.id,o);});} // includes hidden, for desk counting
-function toggleHidden(id){if(hiddenMembers.has(id))hiddenMembers.delete(id);else hiddenMembers.add(id);render();}
+// Hiding is a per-week view/declutter choice — it must NOT carry over to other weeks.
+function toggleHidden(id,o){var wk=wkKey(o);if(!hiddenByWeek[wk])hiddenByWeek[wk]=[];var idx=hiddenByWeek[wk].indexOf(id);if(idx>=0)hiddenByWeek[wk].splice(idx,1);else hiddenByWeek[wk].push(id);render();}
 function monthMembers(mOff){var offs=getMonthWeekOffsets(mOff);return MEMBERS.filter(function(m){return offs.some(function(o){return memberInWeek(m.id,o);});});}
 function isWorking(raw){return raw==='off'||raw==='wfh'||raw==='office'||raw==='otherteam';}
 function getWeekShift(o,id){if(!splitActive(o))return'10';var k=wkKey(o);if(!weekShift[k])weekShift[k]={};if(!weekShift[k][id])weekShift[k][id]=MEMBERS.find(function(m){return m.id===id;}).shift||'10';weekShift[k][id]=migrateShift(weekShift[k][id]);return weekShift[k][id];}
@@ -451,7 +456,7 @@ function removeMember(id){
   if(canHardDelete(id)){
     if(!confirm('Remove '+m.first+' entirely? They were never published and have no schedule history yet, so nothing is lost — but this cannot be undone.'))return;
     MEMBERS=MEMBERS.filter(function(mm){return mm.id!==id;});
-    hiddenMembers.delete(id);
+    Object.keys(hiddenByWeek).forEach(function(wk){var idx=hiddenByWeek[wk].indexOf(id);if(idx>=0)hiddenByWeek[wk].splice(idx,1);});
     render();
     return;
   }
@@ -790,7 +795,7 @@ function render(){
     var hideableMs=MEMBERS.filter(function(m){return m.hideable&&memberInWeek(m.id,o);});
     if(hideableMs.length>0){
       h+='<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px;margin-bottom:6px;"><span style="font-size:11px;color:var(--color-text-tertiary);">Show/hide:</span>';
-      hideableMs.forEach(function(m){var isHid=hiddenMembers.has(m.id);h+='<button onclick="toggleHidden(\''+m.id+'\')" style="font-size:11px;padding:3px 10px;border-radius:20px;border:0.5px solid '+(isHid?'var(--color-border-secondary)':m.ac)+';cursor:pointer;color:'+(isHid?'var(--color-text-tertiary)':m.ac)+';background:'+(isHid?'var(--color-background-secondary)':m.av)+';opacity:'+(isHid?'0.5':'1')+';display:inline-flex;align-items:center;gap:4px;">'+(isHid?ico('plus',10):ico('check',10))+' '+m.first+'</button>';});
+      hideableMs.forEach(function(m){var isHid=isHiddenInWeek(m.id,o);h+='<button onclick="toggleHidden(\''+m.id+'\','+o+')" title="Hiding only applies to this week" style="font-size:11px;padding:3px 10px;border-radius:20px;border:0.5px solid '+(isHid?'var(--color-border-secondary)':m.ac)+';cursor:pointer;color:'+(isHid?'var(--color-text-tertiary)':m.ac)+';background:'+(isHid?'var(--color-background-secondary)':m.av)+';opacity:'+(isHid?'0.5':'1')+';display:inline-flex;align-items:center;gap:4px;">'+(isHid?ico('plus',10):ico('check',10))+' '+m.first+'</button>';});
       h+='</div>';
     }
   }
@@ -822,7 +827,7 @@ function renderWeekGrid(o,dates,sched,hols,holDays,locked,act,split,wfhPD,fmt){
   hdr.appendChild(dg);hdr.innerHTML+='<div style="width:54px;flex-shrink:0;text-align:center;font-size:10px;color:var(--color-text-secondary);">Office<br><span style="color:var(--color-text-tertiary);">/ mo.</span></div>';grid.appendChild(hdr);
 
   MEMBERS.forEach(function(m){
-    if(!memberInWeek(m.id,o)||hiddenMembers.has(m.id))return;
+    if(!memberInWeek(m.id,o)||isHiddenInWeek(m.id,o))return;
     var row=document.createElement('div');row.className='mrow';
     var av=document.createElement('div');av.className='avatar';av.style.cssText='background:'+m.av+';color:'+m.ac+';';av.textContent=m.initials;row.appendChild(av);
     var nameWrap=document.createElement('div');nameWrap.style.cssText='width:104px;flex-shrink:0;';
@@ -867,7 +872,7 @@ function renderWeekGrid(o,dates,sched,hols,holDays,locked,act,split,wfhPD,fmt){
 
   // Day notes footnotes
   var dayNotesList=[];
-  MEMBERS.forEach(function(m){if(!memberInWeek(m.id,o)||hiddenMembers.has(m.id))return;for(var d=0;d<5;d++){var dn2=getDayNote(o,m.id,d);if(dn2)dayNotesList.push({member:m,day:d,note:dn2});}});
+  MEMBERS.forEach(function(m){if(!memberInWeek(m.id,o)||isHiddenInWeek(m.id,o))return;for(var d=0;d<5;d++){var dn2=getDayNote(o,m.id,d);if(dn2)dayNotesList.push({member:m,day:d,note:dn2});}});
   if(dayNotesList.length>0){
     var fnHtml='<div style="margin-top:8px;padding:8px 12px;background:var(--color-background-secondary);border-radius:8px;border:0.5px solid var(--color-border-tertiary);"><div style="font-size:11px;font-weight:500;color:var(--color-text-secondary);margin-bottom:4px;">'+ico('note',12)+' Day notes <span style="font-weight:400;color:var(--color-text-tertiary);">— right-click any cell to add</span></div>';
     dayNotesList.forEach(function(item){

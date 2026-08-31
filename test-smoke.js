@@ -739,6 +739,60 @@ function makeSandbox() {
 })();
 
 // ===========================================================================
+// 9. Hiding a teammate is a per-week view/declutter choice — it must NOT
+//    carry over to other weeks, and must never affect desk-limit counting
+//    (which intentionally still counts hidden members).
+// ===========================================================================
+(function perWeekHideChecks() {
+  const g = makeSandbox();
+  const id = 'ricardo';
+  const weekA = 8, weekB = 9;
+
+  check('not hidden anywhere by default', g.isHiddenInWeek(id, weekA) === false && g.isHiddenInWeek(id, weekB) === false);
+
+  g.toggleHidden(id, weekA);
+  check('toggleHidden hides the member in the targeted week', g.isHiddenInWeek(id, weekA) === true);
+  check('toggleHidden does NOT hide the member in a different week', g.isHiddenInWeek(id, weekB) === false);
+  check('activeMembers excludes the hidden member in that week',
+    g.activeMembers(weekA).every((m) => m.id !== id));
+  check('activeMembers still includes the same member in a different week',
+    g.activeMembers(weekB).some((m) => m.id === id));
+  check('allActiveMembers (desk counting) still includes the hidden member — hiding must not affect desk math',
+    g.allActiveMembers(weekA).some((m) => m.id === id));
+
+  g.toggleHidden(id, weekA);
+  check('toggling again un-hides them in that same week', g.isHiddenInWeek(id, weekA) === false);
+
+  // Legacy data: an old-format publish with a flat hiddenMembers array (global, pre-this-feature)
+  // must migrate to hiding those members in the CURRENT week only, not silently discarding the
+  // preference and not applying it globally either.
+  const g2 = makeSandbox();
+  const curWk = g2.wkKey(0);
+  g2.applyState({ hiddenMembers: ['perla', 'ricardo_int'] });
+  check('legacy hiddenMembers migrates into hiddenByWeek for the current week',
+    g2.isHiddenInWeek('perla', 0) === true && g2.isHiddenInWeek('ricardo_int', 0) === true);
+  check('legacy hiddenMembers migration does NOT apply to other weeks',
+    g2.isHiddenInWeek('perla', 5) === false);
+
+  // exportState()/applyState() round-trip.
+  const g3 = makeSandbox();
+  g3.toggleHidden('alan', 3);
+  const exported = JSON.parse(JSON.stringify(g3.exportState()));
+  check('exportState uses the new hiddenByWeek field, not the old flat hiddenMembers', !exported.hiddenMembers && !!exported.hiddenByWeek);
+  const g4 = makeSandbox();
+  g4.applyState(exported);
+  check('hiddenByWeek round-trips through exportState/applyState', g4.isHiddenInWeek('alan', 3) === true && g4.isHiddenInWeek('alan', 4) === false);
+
+  // dataFingerprint must not flap from hide/un-hide leaving an empty array behind.
+  const g5 = makeSandbox();
+  const fpBefore = g5.dataFingerprint();
+  g5.toggleHidden('mafe', 12);
+  g5.toggleHidden('mafe', 12); // un-hide again, leaves hiddenByWeek[wk] = [] behind
+  const fpAfter = g5.dataFingerprint();
+  check('hiding then un-hiding (leaving an empty array) does not change the data fingerprint', fpBefore === fpAfter);
+})();
+
+// ===========================================================================
 // Summary
 // ===========================================================================
 console.log('\n' + passes + ' passed, ' + failures + ' failed.');
