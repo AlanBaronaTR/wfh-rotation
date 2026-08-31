@@ -119,6 +119,7 @@ var MEMBERS=[
 var DAYS=['Mon','Tue','Wed','Thu','Fri'],CYCLE=['off','wfh','vacation','sick'],MANDATE=3;
 var view='week',wkOffset=0,monthOffset=0,suggestedOffset=null,showExport=false,showCopy=false,showTeams=false,copyMode='sheet',teamsDark=true;
 var lockedWeeks=new Set(),undoStack=[],notes={},weekShift={},shiftOv={},schedule={},holidays={},dismissedAlerts=new Set(),vacationLog=[],hiddenMembers=new Set();
+var lastPublishedAt=null,publishLog=[],UNPUBLISHED_BASELINE=null;
 
 function getMonday(o){var d=new Date(),dow=d.getDay();var diff=d.getDate()-dow+(dow===0?-6:1)+o*7;return new Date(new Date().setDate(diff));}
 function dStr(date){var y=date.getFullYear(),m=String(date.getMonth()+1).padStart(2,'0'),dd=String(date.getDate()).padStart(2,'0');return y+'-'+m+'-'+dd;}
@@ -132,23 +133,30 @@ function splitActive(o){return dStr(getMonday(o))>=SHIFT_SPLIT;}
 weekShift['2026-08-18']={karen:'10',mafe:'10',carlos:'10',miriam:'10',alan:'10',ricardo:'10'};
 // Seed schedule for current week (Aug 18-22, 2026)
 if(!schedule['2026-08-18'])schedule['2026-08-18']={karen:['off','off','off','wfh','off'],mafe:['wfh','off','wfh','off','off'],carlos:['off','wfh','off','off','off'],miriam:['off','off','wfh','off','off'],alan:['off','wfh','off','wfh','off'],ricardo:['off','off','off','off','off']};
-// Public holidays for this MX desk. Only genuine MEXICAN public holidays belong in `holidays` —
-// US holidays (Labor Day, US Independence Day, Thanksgiving, etc.) are normal working days here,
-// with the full 3-day mandate applying as usual. Do not add US holidays even though this team's
-// schedule sits alongside US-based desks that do observe them.
-// Mexico Independence Day — Wednesday Sep 16 (week of Sep 14)
+// Public holidays for this MX desk. Only genuine MEXICAN public holidays go in `holidays` as a
+// normal (excused) holiday — those days are excluded from the office-day mandate entirely, same
+// as a day nobody was expected to work.
+//
+// US holidays (Labor Day, US Independence Day, Thanksgiving, etc.) are NOT excused days off here
+// — the full 3-day mandate still applies for the week/month. If a US holiday is still worth
+// flagging for context (e.g. most of the team treats it as a de facto day off, even though it
+// isn't policy), add it with `mandateApplies:true`. That still shows the Holiday badge/styling to
+// whoever is marked 'off' that day, but — unlike a real Mexican holiday — the day still counts
+// toward the available/workable pool, so nobody gets an automatic mandate pass for it.
+//
+// Mexico Independence Day — Wednesday Sep 16 (week of Sep 14) — genuine holiday, excused.
 if(!holidays['2026-09-14'])holidays['2026-09-14']=[{day:2,name:'Mexico Independence Day'}];
+// US Labor Day — Monday Sep 7 (week of Sep 7) — observed for context only; mandate still applies.
+if(!holidays['2026-09-07'])holidays['2026-09-07']=[{day:0,name:'US Labor Day',mandateApplies:true}];
 
-// Holiday overrides — people working on a Mexican holiday
+// Holiday overrides — people working despite the holiday
 // Sep 16 Mexico Independence Day: Miriam, Carlos and Alan work
 if(!schedule['2026-09-14'])schedule['2026-09-14']={};
 MEMBERS.forEach(function(m){if(!schedule['2026-09-14'][m.id])schedule['2026-09-14'][m.id]=Array(5).fill('off');});
 schedule['2026-09-14'].miriam[2]='wfh';
 schedule['2026-09-14'].carlos[2]='wfh';
 schedule['2026-09-14'].alan[2]='wfh';
-
-// Sep 7 is a normal work week here (US Labor Day does not apply to this MX desk) — Karen and
-// Mafer are simply scheduled WFH on the Monday, same as any other week.
+// Sep 7 US Labor Day: Karen and Mafer work (everyone else shows as Holiday, not working)
 if(!schedule['2026-09-07'])schedule['2026-09-07']={};
 MEMBERS.forEach(function(m){if(!schedule['2026-09-07'][m.id])schedule['2026-09-07'][m.id]=Array(5).fill('off');});
 schedule['2026-09-07'].karen[0]='wfh';
@@ -171,8 +179,19 @@ if(!schedule['2026-08-24'])schedule['2026-08-24']={
 // ===== PERSISTENCE (localStorage) =====
 var STORAGE_KEY='wfh_rotation_mx_desk';
 function saveState(){try{var state=exportState();localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(e){}}
-function exportState(){return{schedule:schedule,holidays:holidays,weekShift:weekShift,shiftOv:shiftOv,notes:notes,lockedWeeks:Array.from(lockedWeeks),vacationLog:vacationLog,hiddenMembers:Array.from(hiddenMembers),shiftTZ:shiftTZ};}
-function applyState(state){if(!state)return;if(state.schedule)Object.assign(schedule,state.schedule);if(state.holidays)Object.assign(holidays,state.holidays);if(state.weekShift){Object.assign(weekShift,state.weekShift);Object.keys(weekShift).forEach(function(wk){Object.keys(weekShift[wk]).forEach(function(mid){weekShift[wk][mid]=migrateShift(weekShift[wk][mid]);});});}if(state.shiftOv){Object.assign(shiftOv,state.shiftOv);Object.keys(shiftOv).forEach(function(wk){Object.keys(shiftOv[wk]).forEach(function(mid){if(Array.isArray(shiftOv[wk][mid]))shiftOv[wk][mid]=shiftOv[wk][mid].map(function(v){return v?migrateShift(v):v;});});});}if(state.notes)Object.assign(notes,state.notes);if(state.lockedWeeks)state.lockedWeeks.forEach(function(k){lockedWeeks.add(k);});if(state.vacationLog)vacationLog=state.vacationLog;if(state.hiddenMembers)state.hiddenMembers.forEach(function(k){hiddenMembers.add(k);});if(state.shiftTZ)shiftTZ=state.shiftTZ;}
+function exportState(){return{schedule:schedule,holidays:holidays,weekShift:weekShift,shiftOv:shiftOv,notes:notes,lockedWeeks:Array.from(lockedWeeks),vacationLog:vacationLog,hiddenMembers:Array.from(hiddenMembers),shiftTZ:shiftTZ,publishedAt:lastPublishedAt,publishLog:publishLog};}
+function applyState(state){if(!state)return;if(state.schedule)Object.assign(schedule,state.schedule);if(state.holidays)Object.assign(holidays,state.holidays);if(state.weekShift){Object.assign(weekShift,state.weekShift);Object.keys(weekShift).forEach(function(wk){Object.keys(weekShift[wk]).forEach(function(mid){weekShift[wk][mid]=migrateShift(weekShift[wk][mid]);});});}if(state.shiftOv){Object.assign(shiftOv,state.shiftOv);Object.keys(shiftOv).forEach(function(wk){Object.keys(shiftOv[wk]).forEach(function(mid){if(Array.isArray(shiftOv[wk][mid]))shiftOv[wk][mid]=shiftOv[wk][mid].map(function(v){return v?migrateShift(v):v;});});});}if(state.notes)Object.assign(notes,state.notes);if(state.lockedWeeks)state.lockedWeeks.forEach(function(k){lockedWeeks.add(k);});if(state.vacationLog)vacationLog=state.vacationLog;if(state.hiddenMembers)state.hiddenMembers.forEach(function(k){hiddenMembers.add(k);});if(state.shiftTZ)shiftTZ=state.shiftTZ;if(state.publishedAt)lastPublishedAt=state.publishedAt;if(state.publishLog)publishLog=state.publishLog;}
+// ===== UNPUBLISHED-CHANGES DETECTION =====
+// A content fingerprint of the real schedule data, deliberately excluding anything that gets
+// lazily auto-filled with defaults just by *viewing* a week (e.g. getSched()/getWeekShift()
+// filling in 'off'/base-shift for a week nobody has touched) — otherwise simply navigating to a
+// new week would look like an "edit" and falsely trigger the unpublished-changes banner.
+function normalizedScheduleForFingerprint(){var out={};Object.keys(schedule).forEach(function(wk){var week=schedule[wk],hasData=false;Object.keys(week).forEach(function(mid){(week[mid]||[]).forEach(function(v){if(v&&v!=='off')hasData=true;});});if(hasData)out[wk]=week;});return out;}
+function normalizedHolidaysForFingerprint(){var out={};Object.keys(holidays).forEach(function(wk){if(holidays[wk]&&holidays[wk].length)out[wk]=holidays[wk];});return out;}
+function normalizedWeekShiftForFingerprint(){var out={};Object.keys(weekShift).forEach(function(wk){var wentry=weekShift[wk],hasCustom=false;Object.keys(wentry).forEach(function(id){var mem=MEMBERS.find(function(mm){return mm.id===id;}),base=(mem&&mem.shift)||'10';if(migrateShift(wentry[id])!==base)hasCustom=true;});if(hasCustom)out[wk]=wentry;});return out;}
+function normalizedShiftOvForFingerprint(){var out={};Object.keys(shiftOv).forEach(function(wk){var wentry=shiftOv[wk],hasOv=false;Object.keys(wentry).forEach(function(id){(wentry[id]||[]).forEach(function(v){if(v)hasOv=true;});});if(hasOv)out[wk]=wentry;});return out;}
+function dataFingerprint(){return JSON.stringify({schedule:normalizedScheduleForFingerprint(),holidays:normalizedHolidaysForFingerprint(),weekShift:normalizedWeekShiftForFingerprint(),shiftOv:normalizedShiftOvForFingerprint(),notes:notes,lockedWeeks:Array.from(lockedWeeks).sort(),vacationLog:vacationLog,hiddenMembers:Array.from(hiddenMembers).sort(),shiftTZ:shiftTZ});}
+function hasUnpublishedChanges(){return UNPUBLISHED_BASELINE!==null&&dataFingerprint()!==UNPUBLISHED_BASELINE;}
 function loadState(){try{var raw=localStorage.getItem(STORAGE_KEY);if(!raw)return;applyState(JSON.parse(raw));}catch(e){}}
 function resetState(){if(confirm('Reset all data to defaults? This clears all your saved schedules, holidays, notes, and shifts.')){localStorage.removeItem(STORAGE_KEY);location.reload();}}
 // ===== SHARED PUBLISHED DATA (data.json) =====
@@ -180,12 +199,20 @@ function resetState(){if(confirm('Reset all data to defaults? This clears all yo
 // EDIT_MODE=false: view-only copy -- always shows what's published in data.json, ignores any local edits.
 var REMOTE_LOADED=false;
 function publishData(){
+  var note=prompt('Optional: short note describing what changed in this publish (leave blank to skip):','');
+  if(note===null)return;
+  lastPublishedAt=new Date().toISOString();
+  publishLog.push({at:lastPublishedAt,note:note.trim()});
+  if(publishLog.length>20)publishLog=publishLog.slice(-20);
   var data=JSON.stringify(exportState(),null,2);
   var blob=new Blob([data],{type:'application/json'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');a.href=url;a.download='data.json';document.body.appendChild(a);a.click();document.body.removeChild(a);
   setTimeout(function(){URL.revokeObjectURL(url);},1000);
+  UNPUBLISHED_BASELINE=dataFingerprint();
+  render();
 }
+function formatPublishedAt(iso){if(!iso)return'never published';try{return new Date(iso).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'});}catch(e){return iso;}}
 function importData(){
   var raw=prompt('Paste exported JSON here (from an old data.json, or from running:\ncopy(localStorage.getItem(\'wfh_rotation_mx_desk\'))\non a previous version of this page):','');
   if(raw===null||raw.trim()==='')return;
@@ -199,6 +226,7 @@ function importData(){
 function bootAndRender(){
   fetch('./data.json?_='+Date.now()).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}).then(function(remote){
     if(remote){REMOTE_LOADED=true;applyState(remote);}
+    UNPUBLISHED_BASELINE=dataFingerprint();
     loadState();
     render();
   });
@@ -225,7 +253,12 @@ function setView(v){view=v;showExport=false;showCopy=false;dismissedAlerts.clear
 function navBack(){if(view==='week')wkOffset--;else monthOffset--;showExport=false;showCopy=false;dismissedAlerts.clear();render();}
 function navFwd(){if(view==='week')wkOffset++;else monthOffset++;showExport=false;showCopy=false;dismissedAlerts.clear();render();}
 function getMonthWeekOffsets(mOff){var now=new Date(),target=new Date(now.getFullYear(),now.getMonth()+mOff,1),y=target.getFullYear(),m=target.getMonth(),res=[];for(var off=-52;off<=52;off++){if(wkDates(off).some(function(d){return d.getFullYear()===y&&d.getMonth()===m;}))res.push(off);}return[...new Set(res)];}
-function availableDaysInWeek(id,o){var s=getSched(o),hd=getHols(o).map(function(h){return h.day;});var c=0;for(var d=0;d<5;d++){if(hd.includes(d)||isPreJoin(id,o,d))continue;if(s[id][d]!=='vacation'&&s[id][d]!=='sick')c++;}return c;}
+// A genuine Mexican holiday excludes its day from the "available" pool UNLESS someone is
+// physically working from the office that day (raw 'office') — working from home on a genuine
+// holiday does NOT restore availability, only actually coming in does. A holiday with
+// mandateApplies:true (e.g. a US holiday observed here, but not an excused day off) never
+// excludes the day at all, worked or not — see the holiday seed comment.
+function availableDaysInWeek(id,o){var s=getSched(o),hols=getHols(o);var c=0;for(var d=0;d<5;d++){if(isPreJoin(id,o,d))continue;var hol=hols.find(function(h){return h.day===d;}),raw=s[id][d];if(hol&&!hol.mandateApplies&&raw!=='office')continue;if(raw!=='vacation'&&raw!=='sick')c++;}return c;}
 function officeDaysInWeek(id,o){var s=getSched(o),hd=getHols(o).map(function(h){return h.day;});var c=0;for(var d=0;d<5;d++){if(isPreJoin(id,o,d))continue;if(hd.includes(d)){if(s[id][d]==='office')c++;continue;}if(s[id][d]==='off')c++;}return c;}
 function officeDaysInMonth(id,mOff){var offs=getMonthWeekOffsets(mOff),now=new Date(),target=new Date(now.getFullYear(),now.getMonth()+mOff,1),y=target.getFullYear(),m=target.getMonth();var c=0;offs.forEach(function(o){var dates=wkDates(o),hd=getHols(o).map(function(h){return h.day;});for(var d=0;d<5;d++){if(dates[d].getFullYear()!==y||dates[d].getMonth()!==m)continue;if(isPreJoin(id,o,d))continue;var raw=getSched(o)[id][d];if(hd.includes(d)){if(raw==='office')c++;continue;}if(raw==='off')c++;}});return c;}
 function mandateForMonth(id,mOff){return MANDATE*getMonthWeekOffsets(mOff).filter(function(o){return memberInWeek(id,o);}).length;}
@@ -347,15 +380,16 @@ function dnKey(o,id,d){return'dn_'+wkKey(o)+'_'+id+'_'+d;}
 function monthlyBreakdown(id,mOff){
   var offs=getMonthWeekOffsets(mOff),now2=new Date(),target=new Date(now2.getFullYear(),now2.getMonth()+mOff,1),y=target.getFullYear(),m=target.getMonth();
   var totalWd=0,holDays=0,vacDays=0,sickDays=0,officeDays=0,wfhDays=0;
-  offs.forEach(function(o){var dates=wkDates(o),hd=getHols(o).map(function(h){return h.day;}),s=getSched(o);
+  offs.forEach(function(o){var dates=wkDates(o),hols=getHols(o),s=getSched(o);
     for(var d=0;d<5;d++){if(dates[d].getFullYear()!==y||dates[d].getMonth()!==m)continue;if(isPreJoin(id,o,d))continue;
       totalWd++;
-      var raw=s[id][d];
-      if(hd.includes(d)&&raw==='off'){holDays++;continue;}
-      if(hd.includes(d)&&raw==='office'){officeDays++;continue;}
-      if(raw==='vacation')vacDays++;
-      else if(raw==='sick')sickDays++;
-      else if(raw==='off')officeDays++;
+      var raw=s[id][d],hol=hols.find(function(h){return h.day===d;});
+      if(raw==='vacation'){vacDays++;continue;}
+      if(raw==='sick'){sickDays++;continue;}
+      if(hol&&raw==='office'){officeDays++;continue;}
+      if(hol&&!hol.mandateApplies){holDays++;if(raw==='wfh')wfhDays++;continue;} // genuine holiday, not physically in office (off or wfh) -> unavailable
+      if(hol&&hol.mandateApplies&&raw==='off')continue; // mandateApplies: still available, but no office credit for not working
+      if(raw==='off')officeDays++;
       else if(raw==='wfh')wfhDays++;
     }
   });
@@ -536,6 +570,22 @@ function buildSheetHTML(o){
   h+='</tr></table>';
   return h;
 }
+function statusBannerHTML(){
+  var h='<div style="margin-bottom:10px;">';
+  h+='<div style="font-size:11px;color:var(--color-text-tertiary);">'+ico('clock',10)+' Last published: '+formatPublishedAt(lastPublishedAt)+'</div>';
+  if(hasUnpublishedChanges()){
+    h+='<div class="alert" style="margin-top:4px;">'+ico('warn',13)+'<span>You have unpublished local changes — remember to click <strong>Publish</strong> and push data.json.</span></div>';
+  }
+  h+='</div>';
+  return h;
+}
+function changelogHTML(){
+  if(!publishLog||!publishLog.length)return'';
+  var items=publishLog.slice().reverse().map(function(entry){
+    return '<div style="font-size:11px;color:var(--color-text-primary);padding:3px 0;border-bottom:0.5px solid var(--color-border-tertiary);"><span style="color:var(--color-text-tertiary);">'+formatPublishedAt(entry.at)+'</span> — '+(entry.note?entry.note:'<span style="color:var(--color-text-tertiary);">(no note)</span>')+'</div>';
+  }).join('');
+  return '<details style="margin-top:14px;"><summary style="cursor:pointer;font-size:13px;font-weight:500;color:var(--color-text-primary);">'+ico('note',12)+' Recent changes ('+publishLog.length+')</summary><div style="margin-top:6px;">'+items+'</div></details>';
+}
 function makeShiftChip(o,id,d,locked){var eff=effShift(o,id,d),ov=isOverridden(o,id,d);var chip=document.createElement('div');chip.className='shift-chip';chip.style.cssText=shiftStyle(eff,ov?'chip-fill':'chip-out');chip.textContent=shiftHrLabel(eff);chip.title=shiftTimeLabel(eff)+(ov?' (override)':' (week default)');if(!locked){chip.addEventListener('click',function(e){e.stopPropagation();cycleShift(id,d,o);});}else chip.style.cursor='default';return chip;}
 
 function render(){
@@ -548,6 +598,7 @@ function render(){
   var h='';
   // Header
   h+='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:1.25rem;"><div><div style="font-size:18px;font-weight:500;display:flex;align-items:center;gap:8px;">WFH Rotation · Mexico Desk</div><div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">3-day mandate'+(locked?' · 🔒 Locked':'')+(split?' · tap badge = week shift · tap 10/11 = one day':' · single 10–6 shift until Jul 20')+' · double-click = office</div></div><div style="display:flex;gap:6px;"><button class="view-btn'+(view==='week'?' active':'')+'" onclick="setView(\'week\')">Weekly</button><button class="view-btn'+(view==='month'?' active':'')+'" onclick="setView(\'month\')">Monthly</button></div></div>';
+  h+=statusBannerHTML();
   // Nav + toolbar
   var canUndo=undoStack.length>0&&undoStack[undoStack.length-1].o===wkOffset;
   h+='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:1rem;"><div style="display:flex;align-items:center;gap:8px;"><button class="nav-btn" onclick="navBack()">'+ico('left',14)+'</button><span style="font-size:13px;font-weight:500;min-width:180px;text-align:center;">'+fmt.format(dates[0])+' – '+fmt.format(dates[4])+'</span><button class="nav-btn" onclick="navFwd()">'+ico('right',14)+'</button></div>';
@@ -593,6 +644,7 @@ function render(){
   // Legend
   h+='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center;"><span class="pill wfh">'+ico('home',11)+' WFH</span><span class="pill shared">'+ico('home',11)+' Shared WFH</span><span class="pill holiday">'+ico('flag',11)+' Holiday</span><span class="pill vacation">'+ico('beach',11)+' Vacation</span><span class="pill sick">'+ico('heartoff',11)+' Sick</span><span class="pill off">'+ico('briefcase',11)+' Office</span>'+(split?'<span class="shift-badge early">10–6 early</span><span class="shift-badge late">11–7 late</span><span style="margin-left:auto;font-size:11px;color:var(--color-text-secondary);">tap badge = whole week · filled chip = day override</span>':'<span class="shift-badge early">10–6</span><span style="margin-left:auto;font-size:11px;color:var(--color-text-secondary);">11–7 split starts Jul 20</span>')+'</div>';
   h+='<div id="editor-section"></div><div id="holiday-section"></div><div id="vacation-section"></div><div id="copy-section"></div><div id="teams-section"></div><div id="export-section"></div>';
+  h+=changelogHTML();
   h+='<div style="margin-top:20px;padding-top:12px;border-top:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:space-between;"><span style="font-size:10px;color:var(--color-text-tertiary);">Changes auto-saved to this browser.</span><button onclick="resetState()" style="font-size:10px;color:var(--color-text-tertiary);background:none;border:none;cursor:pointer;text-decoration:underline;opacity:.6;">Reset to defaults</button></div>';
 
   document.getElementById('app').innerHTML=h;
@@ -798,6 +850,7 @@ function renderMonthView(){
   // Recalculate header for month
   var app=document.getElementById('app');
   var h='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:1.25rem;"><div><div style="font-size:18px;font-weight:500;">WFH Rotation · Mexico Desk</div><div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">Monthly view · 3-day mandate</div></div><div style="display:flex;gap:6px;"><button class="view-btn'+(view==='week'?' active':'')+'" onclick="setView(\'week\')">Weekly</button><button class="view-btn'+(view==='month'?' active':'')+'" onclick="setView(\'month\')">Monthly</button></div></div>';
+  h+=statusBannerHTML();
   h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;"><button class="nav-btn" onclick="navBack()">'+ico('left',14)+'</button><span style="font-size:13px;font-weight:500;min-width:180px;text-align:center;">'+target.toLocaleString('en-GB',{month:'long',year:'numeric'})+'</span><button class="nav-btn" onclick="navFwd()">'+ico('right',14)+'</button></div>';
 
   var totalAway=0;wkOffs.forEach(function(o){var s=getSched(o),dates=wkDates(o);activeMembers(o).forEach(function(mem){for(var d=0;d<5;d++){if(dates[d].getFullYear()!==y||dates[d].getMonth()!==m||isPreJoin(mem.id,o,d))continue;var st=s[mem.id][d];if(st==='vacation'||st==='sick')totalAway++;}});});
