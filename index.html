@@ -476,6 +476,12 @@ function setCopyMode(mode){copyMode=mode;render();}
 function dismissAlert(key){dismissedAlerts.add(key);var el=document.getElementById('alert-'+key);if(el)el.style.display='none';}
 // ===== VACATION LOG =====
 function stampVacation(entry,status){
+  // An 'otherteam' assignment must never override — or, when the entry is later removed/shrunk,
+  // clobber — a day that's already vacation/sick, or a genuine (excused) Mexican holiday. Those
+  // represent "not here at all", which takes priority over "here, but with a different team".
+  // This applies the same way whether we're applying 'otherteam' or reverting it back to 'off',
+  // so a day that was correctly left untouched at apply time is also left untouched on removal.
+  var isOtherTeamEntry=entry.type==='otherteam';
   var start=new Date(entry.start+'T12:00:00'),end=new Date(entry.end+'T12:00:00');
   for(var d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
     var dow=d.getDay();if(dow===0||dow===6)continue;
@@ -483,7 +489,14 @@ function stampVacation(entry,status){
     var monday=new Date(d);monday.setDate(monday.getDate()-dayIdx);
     var wk=dStr(monday);
     if(!schedule[wk]){schedule[wk]={};MEMBERS.forEach(function(m){schedule[wk][m.id]=Array(5).fill('off');});}
-    if(schedule[wk][entry.id])schedule[wk][entry.id][dayIdx]=status;
+    if(!schedule[wk][entry.id])continue;
+    if(isOtherTeamEntry){
+      var cur=schedule[wk][entry.id][dayIdx];
+      if(cur==='vacation'||cur==='sick')continue;
+      var hol=(holidays[wk]||[]).find(function(h){return h.day===dayIdx;});
+      if(hol&&!hol.mandateApplies)continue;
+    }
+    schedule[wk][entry.id][dayIdx]=status;
   }
 }
 var editingVacationIdx=null; // index into vacationLog currently being edited, or null when adding new

@@ -924,8 +924,12 @@ function makeSandbox() {
   try { g.saveVacationEdit(); } catch (e) { check('saveVacationEdit() does not throw (extend)', false, e.stack); }
   check('saveVacationEdit() extends the range — original week still otherteam',
     g.schedule['2026-09-07'][id].every((v) => v === 'otherteam'));
-  check('saveVacationEdit() extends the range — the new week is now otherteam too',
-    g.schedule['2026-09-14'][id].every((v) => v === 'otherteam'));
+  // 2026-09-14 is seeded with a genuine Mexico Independence Day holiday on Wednesday (index 2) —
+  // that day must stay 'off' (Holiday), not become otherteam; the other 4 days of the new week do.
+  check('saveVacationEdit() extends the range — the new week is otherteam EXCEPT the genuine holiday day',
+    g.schedule['2026-09-14'][id][0] === 'otherteam' && g.schedule['2026-09-14'][id][1] === 'otherteam' &&
+    g.schedule['2026-09-14'][id][2] === 'off' && g.schedule['2026-09-14'][id][3] === 'otherteam' &&
+    g.schedule['2026-09-14'][id][4] === 'otherteam');
   check('editingVacationIdx is cleared after saving', g.editingVacationIdx === null);
   check('editing did not create a second log entry — the original entry was updated in place',
     g.vacationLog.length === 1 && g.vacationLog[0].end === '2026-09-18');
@@ -1027,6 +1031,55 @@ function makeSandbox() {
   check('editing an otherteam entry sets the toggle to otherteam', g.vacTypeSelection === 'otherteam');
   g.cancelEditVacation();
   check('cancelling resets the toggle back to vacation', g.vacTypeSelection === 'vacation');
+})();
+
+// ===========================================================================
+// 12c. An 'otherteam' assignment must never override — or, on removal, clobber
+//      — an existing vacation/sick day or a genuine (excused) holiday. This is
+//      exactly the bug that shipped: a wide otherteam range silently erased a
+//      narrower pre-existing vacation entry and a Mexican public holiday.
+// ===========================================================================
+(function otherTeamPriorityChecks() {
+  const g = makeSandbox();
+  const id = 'ricardo';
+  const o = 60;
+  const wk = g.wkKey(o);
+  // Day 0 (Mon): pre-existing vacation. Day 1 (Tue): pre-existing sick. Day 2 (Wed): plain, no
+  // conflict. Day 3 (Thu): genuine (excused) holiday. Day 4 (Fri): mandateApplies (US) holiday.
+  g.schedule[wk] = {};
+  g.MEMBERS.forEach((m) => { g.schedule[wk][m.id] = Array(5).fill('off'); });
+  g.schedule[wk][id] = ['vacation', 'sick', 'off', 'off', 'off'];
+  g.holidays[wk] = [{ day: 3, name: 'Genuine Holiday' }, { day: 4, name: 'US Holiday', mandateApplies: true }];
+
+  const entry = { id: id, start: g.wkKey(o), end: g.dStr(g.wkDates(o)[4]), type: 'otherteam' };
+  g.stampVacation(entry, 'otherteam');
+  check('otherteam does not override an existing vacation day', g.schedule[wk][id][0] === 'vacation');
+  check('otherteam does not override an existing sick day', g.schedule[wk][id][1] === 'sick');
+  check('otherteam applies normally to a plain day with no conflicting status', g.schedule[wk][id][2] === 'otherteam');
+  check('otherteam does not override a genuine holiday day (stays off/Holiday)', g.schedule[wk][id][3] === 'off');
+  check('otherteam DOES apply on a mandateApplies (US) holiday day', g.schedule[wk][id][4] === 'otherteam');
+
+  // Removing/reverting must not clobber the days that were correctly left untouched.
+  g.stampVacation(entry, 'off');
+  check('reverting otherteam leaves the vacation day untouched', g.schedule[wk][id][0] === 'vacation');
+  check('reverting otherteam leaves the sick day untouched', g.schedule[wk][id][1] === 'sick');
+  check('reverting otherteam correctly clears the plain day it DID apply to', g.schedule[wk][id][2] === 'off');
+  check('reverting otherteam leaves the genuine holiday day untouched (still off)', g.schedule[wk][id][3] === 'off');
+  check('reverting otherteam correctly clears the mandateApplies-holiday day it DID apply to', g.schedule[wk][id][4] === 'off');
+
+  // A plain 'vacation'-type entry must be unaffected by this priority logic — it still overwrites
+  // whatever was there, matching its existing (unchanged) behavior.
+  const g2 = makeSandbox();
+  const o2 = 61;
+  const wk2 = g2.wkKey(o2);
+  g2.schedule[wk2] = {};
+  g2.MEMBERS.forEach((m) => { g2.schedule[wk2][m.id] = Array(5).fill('off'); });
+  g2.schedule[wk2][id] = ['sick', 'off', 'off', 'off', 'off'];
+  g2.holidays[wk2] = [{ day: 1, name: 'Genuine Holiday' }];
+  const vacEntry = { id: id, start: g2.wkKey(o2), end: g2.dStr(g2.wkDates(o2)[4]), type: 'vacation' };
+  g2.stampVacation(vacEntry, 'vacation');
+  check('a plain vacation entry still overwrites an existing sick day (unchanged behavior)', g2.schedule[wk2][id][0] === 'vacation');
+  check('a plain vacation entry still overwrites a genuine holiday day (unchanged behavior)', g2.schedule[wk2][id][1] === 'vacation');
 })();
 
 // ===========================================================================
