@@ -492,7 +492,19 @@ var editingVacationIdx=null; // index into vacationLog currently being edited, o
 // logged as a vacation) — tracked as explicit state behind a visible toggle instead, see
 // vacTypeToggleHTML()/setVacType().
 var vacTypeSelection='vacation';
-function setVacType(t){vacTypeSelection=t;render();}
+function vacTypeBtnStyle(active,bg,bd){return'font-size:12px;padding:5px 10px;border-radius:6px;border:1.5px solid '+(active?bd:'var(--color-border-secondary)')+';cursor:pointer;background:'+(active?bg:'var(--color-background-primary)')+';color:'+(active?'#fff':'var(--color-text-secondary)')+';font-weight:'+(active?'600':'400')+';display:inline-flex;align-items:center;gap:4px;';}
+// Deliberately does NOT call render(): this section's full HTML (including the member/date/note
+// inputs) is rebuilt via innerHTML on every render(), which would silently wipe out whatever the
+// user has already typed/selected but not yet submitted (this is exactly what caused the member
+// dropdown to snap back to the first option when the type toggle was clicked). Instead, update
+// just the two toggle buttons' own styling in place.
+function setVacType(t){
+  vacTypeSelection=t;
+  var vBtn=document.getElementById('vac-type-btn-vacation');
+  if(vBtn)vBtn.style.cssText=vacTypeBtnStyle(t==='vacation','#D97706','#B45309');
+  var oBtn=document.getElementById('vac-type-btn-otherteam');
+  if(oBtn)oBtn.style.cssText=vacTypeBtnStyle(t==='otherteam','#4F46E5','#4338CA');
+}
 function addVacation(){
   var id=document.getElementById('vac-member').value;
   var start=document.getElementById('vac-start').value;
@@ -1067,7 +1079,7 @@ function renderWeekGrid(o,dates,sched,hols,holDays,locked,act,split,wfhPD,fmt){
   // with its current values) so the range can be adjusted — add/remove days or weeks — in place,
   // instead of deleting and re-creating entries.
   var editingVacEntry=editingVacationIdx!==null?vacationLog[editingVacationIdx]:null;
-  var vacTypeBtn=function(t,label,activeBg,activeBd,icoName){var active=vacTypeSelection===t;return'<button type="button" onclick="setVacType(\''+t+'\')" style="font-size:12px;padding:5px 10px;border-radius:6px;border:1.5px solid '+(active?activeBd:'var(--color-border-secondary)')+';cursor:pointer;background:'+(active?activeBg:'var(--color-background-primary)')+';color:'+(active?'#fff':'var(--color-text-secondary)')+';font-weight:'+(active?'600':'400')+';display:inline-flex;align-items:center;gap:4px;">'+ico(icoName,11)+' '+label+'</button>';};
+  var vacTypeBtn=function(t,label,activeBg,activeBd,icoName){var active=vacTypeSelection===t;return'<button type="button" id="vac-type-btn-'+t+'" onclick="setVacType(\''+t+'\')" style="'+vacTypeBtnStyle(active,activeBg,activeBd)+'">'+ico(icoName,11)+' '+label+'</button>';};
   var vacHtml='<div style="margin-top:14px;"><div class="section-title">'+ico('beach',14)+' Vacation & other-team log</div><div class="hol-form">';
   if(editingVacEntry)vacHtml+='<div style="font-size:11px;font-weight:500;color:#0C447C;margin-bottom:6px;">'+ico('edit',11)+' Editing this entry — change dates/member/note below, then Save.</div>';
   vacHtml+='<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;"><select id="vac-member" style="font-size:12px;padding:5px 8px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);">'+MEMBERS.map(function(m){return'<option value="'+m.id+'"'+(editingVacEntry&&editingVacEntry.id===m.id?' selected':'')+'>'+m.first+'</option>';}).join('')+'</select><span style="display:flex;gap:4px;">'+vacTypeBtn('vacation','Vacation','#D97706','#B45309','beach')+vacTypeBtn('otherteam','Other team','#4F46E5','#4338CA','pin')+'</span><label style="font-size:11px;color:var(--color-text-secondary);">From</label><input type="date" id="vac-start" value="'+(editingVacEntry?editingVacEntry.start:'')+'" onchange="vacStartChanged()" style="font-size:12px;padding:4px 6px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);" /><label style="font-size:11px;color:var(--color-text-tertiary);">To <span style="font-size:10px;">(optional)</span></label><input type="date" id="vac-end" value="'+(editingVacEntry?editingVacEntry.end:'')+'" style="font-size:12px;padding:4px 6px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);" /><input id="vac-note" placeholder="Note (optional)" value="'+(editingVacEntry?(editingVacEntry.note||'').replace(/"/g,'&quot;'):'')+'" style="flex:1;min-width:100px;font-size:12px;padding:5px 8px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);" />';

@@ -994,12 +994,24 @@ function makeSandbox() {
   check('the type toggle renders two distinct buttons, not a hidden/silent default',
     panel.indexOf("setVacType('vacation')") !== -1 && panel.indexOf("setVacType('otherteam')") !== -1);
 
+  // The actual regression: setVacType() must NEVER trigger a full render(), because render()
+  // rebuilds this whole section via innerHTML, which (in a real browser) destroys and recreates
+  // the member/date/note inputs — silently snapping the member <select> back to its first option
+  // (Karen) and blanking any dates/notes already typed. This harness's DOM stub doesn't model
+  // that destructive innerHTML behavior, so the only reliable way to catch it is to confirm
+  // render() is never called at all, and that the toggle instead updates itself directly.
+  let renderCalls = 0;
+  const origRender = g.render;
+  g.render = function () { renderCalls++; return origRender.apply(this, arguments); };
   g.setVacType('otherteam');
   check('setVacType updates the selection', g.vacTypeSelection === 'otherteam');
-  g.render();
-  panel = g.document.getElementById('vacation-section').innerHTML;
-  check('after selecting Other team, that button visibly shows as active (distinct styling)',
-    (panel.match(/font-weight:600/g) || []).length >= 1);
+  check('setVacType does NOT call render() (would wipe the in-progress member/date/note fields)', renderCalls === 0);
+  g.render = origRender;
+
+  check("setVacType updates the 'otherteam' button's own style directly (active)",
+    g.document.getElementById('vac-type-btn-otherteam').style.cssText.indexOf('font-weight:600') !== -1);
+  check("setVacType updates the 'vacation' button's own style directly (inactive)",
+    g.document.getElementById('vac-type-btn-vacation').style.cssText.indexOf('font-weight:600') === -1);
 
   // Adding an entry without touching the toggle must still default to vacation (intentional,
   // documented default) — but selecting otherteam first must actually produce an otherteam entry.

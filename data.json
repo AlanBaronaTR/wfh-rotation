@@ -155,11 +155,11 @@
         "vacation"
       ],
       "carlos": [
-        "wfh",
-        "off",
-        "wfh",
-        "off",
-        "off"
+        "otherteam",
+        "otherteam",
+        "otherteam",
+        "otherteam",
+        "otherteam"
       ],
       "miriam": [
         "off",
@@ -169,11 +169,11 @@
         "off"
       ],
       "ricardo": [
-        "otherteam",
-        "otherteam",
-        "otherteam",
-        "otherteam",
-        "otherteam"
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
       ],
       "alan": [
         "vacation",
@@ -214,10 +214,10 @@
       ],
       "carlos": [
         "off",
-        "off",
-        "wfh",
-        "off",
-        "off"
+        "otherteam",
+        "otherteam",
+        "otherteam",
+        "otherteam"
       ],
       "miriam": [
         "off",
@@ -228,10 +228,10 @@
       ],
       "ricardo": [
         "off",
-        "otherteam",
-        "otherteam",
-        "otherteam",
-        "otherteam"
+        "off",
+        "off",
+        "off",
+        "off"
       ],
       "alan": [
         "off",
@@ -1073,9 +1073,9 @@
         "off"
       ],
       "carlos": [
-        "off",
-        "off",
-        "off",
+        "otherteam",
+        "otherteam",
+        "otherteam",
         "off",
         "vacation"
       ],
@@ -1087,9 +1087,9 @@
         "off"
       ],
       "ricardo": [
-        "otherteam",
-        "otherteam",
-        "otherteam",
+        "off",
+        "off",
+        "off",
         "off",
         "off"
       ],
@@ -1625,11 +1625,11 @@
         "off"
       ],
       "carlos": [
-        "off",
-        "off",
-        "off",
-        "wfh",
-        "wfh"
+        "otherteam",
+        "otherteam",
+        "otherteam",
+        "otherteam",
+        "otherteam"
       ],
       "miriam": [
         "wfh",
@@ -1639,11 +1639,11 @@
         "wfh"
       ],
       "ricardo": [
-        "otherteam",
-        "otherteam",
-        "otherteam",
-        "otherteam",
-        "otherteam"
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
       ],
       "perla": [
         "off",
@@ -2984,10 +2984,10 @@
       "note": ""
     },
     {
-      "id": "ricardo",
+      "id": "carlos",
       "start": "2026-09-08",
       "end": "2026-09-30",
-      "note": "Elections team (training)",
+      "note": "Elections team training",
       "type": "otherteam"
     }
   ],
@@ -3011,7 +3011,7 @@
     ]
   },
   "shiftTZ": "mx",
-  "publishedAt": "2026-08-31T04:21:26.812Z",
+  "publishedAt": "2026-08-31T04:34:20.935Z",
   "publishLog": [
     {
       "at": "2026-08-31T01:40:31.731Z",
@@ -3035,6 +3035,14 @@
     },
     {
       "at": "2026-08-31T04:21:26.812Z",
+      "note": ""
+    },
+    {
+      "at": "2026-08-31T04:32:23.045Z",
+      "note": ""
+    },
+    {
+      "at": "2026-08-31T04:34:20.935Z",
       "note": ""
     }
   ]
