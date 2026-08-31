@@ -1241,6 +1241,14 @@ function renderMonthView(){
   });
 }
 
+// Some browsers restore a tab from bfcache (back/forward cache) instead of truly re-running this
+// script from scratch — that resumes the exact in-memory state from before, including whatever week
+// you'd navigated to, rather than landing back on the current week. Force it back to "today" so a
+// reload/tab-restore always opens on the current week, matching a genuine fresh load.
+window.addEventListener('pageshow',function(e){
+  if(e.persisted){wkOffset=0;monthOffset=0;dismissedAlerts.clear();showExport=false;showCopy=false;showTeams=false;render();}
+});
+
 bootAndRender();
 </script>
 </body>

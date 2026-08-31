@@ -71,6 +71,7 @@ function makeSandbox() {
   capturedHTML = [];
   const sandbox = {};
   sandbox.window = sandbox;
+  sandbox.addEventListener = function(type, fn) { sandbox['__on_' + type] = fn; };
   sandbox.console = console;
   sandbox.localStorage = { getItem() { return null; }, setItem() {}, removeItem() {} };
   sandbox.fetch = () => Promise.reject(new Error('network disabled in test-smoke.js'));
@@ -1178,6 +1179,23 @@ function makeFakeHandle(mode) {
   g5.confirm = () => true;
   g5.resetPublishFileHandle();
   check('resetPublishFileHandle clears the cached handle when confirmed', g5.PUBLISH_FILE_HANDLE === null);
+
+  // ===========================================================================
+  // 14. A tab restored from bfcache (rather than truly re-run from scratch)
+  //     must snap back to the current week/month, not resume wherever it was
+  //     navigated to before — that's the "reload always lands on an old week"
+  //     bug: bfcache resumes the exact in-memory wkOffset instead of
+  //     recomputing it.
+  // ===========================================================================
+  const g6 = makeSandbox();
+  check('a pageshow listener was registered', typeof g6.__on_pageshow === 'function');
+  g6.wkOffset = 13; g6.monthOffset = 4; g6.showExport = true;
+  g6.__on_pageshow({ persisted: false });
+  check('a non-bfcache pageshow (persisted:false) leaves the current week alone', g6.wkOffset === 13);
+  g6.__on_pageshow({ persisted: true });
+  check('a bfcache-restored pageshow (persisted:true) resets to the current week', g6.wkOffset === 0);
+  check('a bfcache-restored pageshow also resets the current month', g6.monthOffset === 0);
+  check('a bfcache-restored pageshow re-renders without throwing', capturedHTML.length > 0);
 
   // ===========================================================================
   // Summary
