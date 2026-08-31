@@ -289,7 +289,15 @@ function monthlyOfficeSoFar(id,mOff){var offs=getMonthWeekOffsets(mOff),now=new 
 function weeksRemainingInMonth(id,mOff){return getMonthWeekOffsets(mOff).filter(function(o){return getMonday(o)>new Date()&&memberInWeek(id,o);}).length;}
 function pushUndo(o){var s=getSched(o),snap={o:o,data:{}};MEMBERS.forEach(function(m){snap.data[m.id]=[...s[m.id]];});undoStack.push(snap);if(undoStack.length>30)undoStack.shift();}
 function undo(){if(!undoStack.length)return;var snap=undoStack.pop();MEMBERS.forEach(function(m){if(snap.data[m.id])schedule[wkKey(snap.o)][m.id]=[...snap.data[m.id]];});render();}
-var HOL_CYCLE=['off','office','wfh'];
+// Holiday cells cycle through the FULL status range, same as a normal day — 'off' still renders
+// as "Holiday" (the default, not-working state), but anyone required to work that day can be set
+// to 'office' or 'wfh' (both already render with normal, non-holiday styling), and — just like a
+// normal day — someone can also be marked 'vacation' or 'sick' on a holiday. Every downstream
+// consumer (mandate/desk-limit math, exports, Teams/screenshot previews) already treats vacation
+// and sick correctly regardless of holiday status, since the vacation-log feature already relied
+// on that; this cycle just exposes the same values via a direct click instead of only via the
+// vacation log form.
+var HOL_CYCLE=['off','office','wfh','vacation','sick'];
 function cycleCell(id,di,o){if(isPreJoin(id,o,di))return;var hd=getHols(o).map(function(h){return h.day;});var isHol=hd.includes(di);if(isLocked(o)&&!isHol)return;pushUndo(o);var s=getSched(o);if(isHol){var cur=s[id][di],idx=HOL_CYCLE.indexOf(cur);s[id][di]=HOL_CYCLE[(idx<0?0:idx+1)%HOL_CYCLE.length];}else{s[id][di]=CYCLE[(CYCLE.indexOf(s[id][di])+1)%CYCLE.length];}render();}
 function setDayState(id,di,st,o){if(isLocked(o)||isPreJoin(id,o,di))return;pushUndo(o);getSched(o)[id][di]=st;render();}
 function toggleLock(){var k=wkKey(wkOffset);if(lockedWeeks.has(k))lockedWeeks.delete(k);else lockedWeeks.add(k);render();}
@@ -492,7 +500,7 @@ function editDayNote(o,id,d){
   if(val.trim())notes[key]=val.trim();else delete notes[key];
   render();
 }
-function buildTSV(o,mode){var dates=wkDates(o),sched=getSched(o),hols=getHols(o),holDays=hols.map(function(h){return h.day;}),act=activeMembers(o),split=splitActive(o);var fmt=new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short'});var weekLabel=fmt.format(dates[0])+'–'+fmt.format(dates[4]);var lines=[];lines.push([weekLabel].concat(DAYS).join('\t'));var bands=split?SHIFT_ORDER.filter(function(s){return act.some(function(m){for(var dd=0;dd<5;dd++){if(!isPreJoin(m.id,o,dd)&&isWorking(sched[m.id][dd])&&effShift(o,m.id,dd)===s)return true;}return false;});}):['10'];bands.forEach(function(band){var label=mode==='ist'?SHIFTS[band].ist+' (MX)':SHIFTS[band].full;var cells=[label];for(var d=0;d<5;d++){if(holDays.includes(d)){var hnames=act.filter(function(m){if(isPreJoin(m.id,o,d))return false;var raw=sched[m.id][d];return(raw==='wfh'||raw==='office')&&effShift(o,m.id,d)===band;}).map(function(m){return m.first+' ('+(sched[m.id][d]==='office'?'O':'H')+')';});cells.push(hnames.length?hnames.join(', '):'Holiday');continue;}var names=act.filter(function(m){if(isPreJoin(m.id,o,d))return false;var raw=sched[m.id][d];return isWorking(raw)&&effShift(o,m.id,d)===band;}).map(function(m){return m.first+' ('+(sched[m.id][d]==='off'?'O':'H')+')';});cells.push(names.join(', '));}lines.push(cells.join('\t'));});var leaveCells=['Leaves'];for(var d=0;d<5;d++){if(holDays.includes(d)){leaveCells.push('');continue;}var names=act.filter(function(m){if(isPreJoin(m.id,o,d))return false;var raw=sched[m.id][d];return raw==='vacation'||raw==='sick';}).map(function(m){return m.first+' ('+(sched[m.id][d]==='vacation'?'V':'S')+')';});leaveCells.push(names.join(', '));}lines.push(leaveCells.join('\t'));lines.push(['Key','(O) office','(H) home','(V) vacation','(S) sick'].join('\t'));return lines.join('\n');}
+function buildTSV(o,mode){var dates=wkDates(o),sched=getSched(o),hols=getHols(o),holDays=hols.map(function(h){return h.day;}),act=activeMembers(o),split=splitActive(o);var fmt=new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short'});var weekLabel=fmt.format(dates[0])+'–'+fmt.format(dates[4]);var lines=[];lines.push([weekLabel].concat(DAYS).join('\t'));var bands=split?SHIFT_ORDER.filter(function(s){return act.some(function(m){for(var dd=0;dd<5;dd++){if(!isPreJoin(m.id,o,dd)&&isWorking(sched[m.id][dd])&&effShift(o,m.id,dd)===s)return true;}return false;});}):['10'];bands.forEach(function(band){var label=mode==='ist'?SHIFTS[band].ist+' (MX)':SHIFTS[band].full;var cells=[label];for(var d=0;d<5;d++){if(holDays.includes(d)){var hnames=act.filter(function(m){if(isPreJoin(m.id,o,d))return false;var raw=sched[m.id][d];return(raw==='wfh'||raw==='office')&&effShift(o,m.id,d)===band;}).map(function(m){return m.first+' ('+(sched[m.id][d]==='office'?'O':'H')+')';});cells.push(hnames.length?hnames.join(', '):'Holiday');continue;}var names=act.filter(function(m){if(isPreJoin(m.id,o,d))return false;var raw=sched[m.id][d];return isWorking(raw)&&effShift(o,m.id,d)===band;}).map(function(m){return m.first+' ('+(sched[m.id][d]==='off'?'O':'H')+')';});cells.push(names.join(', '));}lines.push(cells.join('\t'));});var leaveCells=['Leaves'];for(var d=0;d<5;d++){var names=act.filter(function(m){if(isPreJoin(m.id,o,d))return false;var raw=sched[m.id][d];return raw==='vacation'||raw==='sick';}).map(function(m){return m.first+' ('+(sched[m.id][d]==='vacation'?'V':'S')+')';});leaveCells.push(names.join(', '));}lines.push(leaveCells.join('\t'));lines.push(['Key','(O) office','(H) home','(V) vacation','(S) sick'].join('\t'));return lines.join('\n');}
 function buildSheetTSV(o){
   var dates=wkDates(o),sched=getSched(o),hols=getHols(o),holDays=hols.map(function(h){return h.day;}),act=activeMembers(o),split=splitActive(o);
   var mon=dates[0],fri=dates[4];
@@ -802,7 +810,7 @@ function renderWeekGrid(o,dates,sched,hols,holDays,locked,act,split,wfhPD,fmt){
       var cellLocked=locked&&!isHol;
       cell.className='cell '+st+(cellLocked?' locked':'');
       var iconDiv=document.createElement('div');iconDiv.innerHTML=cellIcon(st);cell.appendChild(iconDiv);
-      if(isHol){var holObj=hols.find(function(hh){return hh.day===d;});cell.title=(holObj?holObj.name:'Holiday')+' — currently: '+stLabel(st)+' — click to cycle (Holiday → Office → Home)';}
+      if(isHol){var holObj=hols.find(function(hh){return hh.day===d;});cell.title=(holObj?holObj.name:'Holiday')+' — currently: '+stLabel(st)+' — click to cycle (Holiday → Office → Home → Vacation → Sick)';}
       else{cell.title=cellLocked?'Week is locked':stLabel(st);}
       // Day note indicator + tooltip
       var dn=getDayNote(o,m.id,d);

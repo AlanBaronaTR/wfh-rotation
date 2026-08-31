@@ -116,13 +116,20 @@ function makeSandbox() {
   g.lockedWeeks.delete(wk);
   const id = g.MEMBERS[0].id, d = 1;
 
+  // Holiday cells cycle through the FULL status range (same as a normal day) so someone required
+  // to work can be set to office/wfh, and someone out that day can still be marked vacation/sick
+  // directly — not just via the separate vacation-log form.
   check('holiday cell starts at off (Holiday)', g.schedule[wk][id][d] === 'off');
   g.cycleCell(id, d, o);
-  check("1st click cycles Holiday -> Office", g.schedule[wk][id][d] === 'office');
+  check('1st click cycles Holiday -> Office', g.schedule[wk][id][d] === 'office');
   g.cycleCell(id, d, o);
-  check("2nd click cycles Office -> Home", g.schedule[wk][id][d] === 'wfh');
+  check('2nd click cycles Office -> Home', g.schedule[wk][id][d] === 'wfh');
   g.cycleCell(id, d, o);
-  check("3rd click cycles Home -> Holiday", g.schedule[wk][id][d] === 'off');
+  check('3rd click cycles Home -> Vacation', g.schedule[wk][id][d] === 'vacation');
+  g.cycleCell(id, d, o);
+  check('4th click cycles Vacation -> Sick', g.schedule[wk][id][d] === 'sick');
+  g.cycleCell(id, d, o);
+  check('5th click cycles Sick -> back to Holiday', g.schedule[wk][id][d] === 'off');
 
   // officeDaysInWeek / officeDaysInMonth: office-on-holiday should count, wfh/off should not.
   g.schedule[wk][id][d] = 'off';
@@ -555,6 +562,66 @@ function makeSandbox() {
   g4.addMember();
   const fp2 = g4.dataFingerprint();
   check('adding a member changes the data fingerprint (registers as an unpublished change)', fp1 !== fp2);
+})();
+
+// ===========================================================================
+// 6. Holiday cells must reach the FULL status range via direct click (not just
+//    office/wfh via the 3-state cycle, and not just vacation via the separate
+//    vacation-log form) — someone required to work should be settable to
+//    office/wfh, and someone out that day should be directly settable to
+//    vacation/sick too, with mandate math and exports handling it correctly
+//    either way it was set.
+// ===========================================================================
+(function holidayFullCycleChecks() {
+  const g = makeSandbox();
+  const id = g.MEMBERS[0].id;
+
+  // Genuine holiday: reaching 'vacation'/'sick' via cycleCell (not the vacation-log form). Days
+  // 1-4 are 'wfh' (not 'off') so they don't also register as office days and contaminate the
+  // office-credit assertions below — isolates day 0's behavior specifically.
+  const oReal = 13;
+  const wkReal = g.wkKey(oReal);
+  g.schedule[wkReal] = {};
+  g.MEMBERS.forEach((m) => { g.schedule[wkReal][m.id] = ['off', 'wfh', 'wfh', 'wfh', 'wfh']; });
+  g.holidays[wkReal] = [{ day: 0, name: 'Full-Cycle Holiday' }];
+
+  g.schedule[wkReal][id][0] = 'vacation'; // simulate having clicked through to it
+  check('availableDaysInWeek excludes a holiday day the click-cycle set to vacation', g.availableDaysInWeek(id, oReal) === 4);
+  check('officeDaysInWeek gives no credit for a holiday day set to vacation', g.officeDaysInWeek(id, oReal) === 0);
+
+  g.schedule[wkReal][id][0] = 'sick';
+  check('availableDaysInWeek excludes a holiday day the click-cycle set to sick', g.availableDaysInWeek(id, oReal) === 4);
+  check('officeDaysInWeek gives no credit for a holiday day set to sick', g.officeDaysInWeek(id, oReal) === 0);
+
+  const now = new Date();
+  const wkDateReal = g.wkDates(oReal)[0];
+  const mOffReal = (wkDateReal.getFullYear() - now.getFullYear()) * 12 + (wkDateReal.getMonth() - now.getMonth());
+  const mbSick = g.monthlyBreakdown(id, mOffReal);
+  g.schedule[wkReal][id][0] = 'vacation';
+  const mbVacation = g.monthlyBreakdown(id, mOffReal);
+  check('monthlyBreakdown buckets a holiday-day sick entry into sickDays', mbSick.sickDays === mbVacation.sickDays + 1);
+  check('monthlyBreakdown buckets a holiday-day vacation entry into vacDays', mbVacation.vacDays === mbSick.vacDays + 1);
+
+  // mandateApplies holiday: same vacation/sick handling must hold.
+  const oFlag = 31;
+  const wkFlag = g.wkKey(oFlag);
+  g.schedule[wkFlag] = {};
+  g.MEMBERS.forEach((m) => { g.schedule[wkFlag][m.id] = Array(5).fill('off'); });
+  g.holidays[wkFlag] = [{ day: 0, name: 'Full-Cycle US Holiday', mandateApplies: true }];
+  g.schedule[wkFlag][id][0] = 'sick';
+  check('mandateApplies holiday day set to sick is excluded from availableDaysInWeek', g.availableDaysInWeek(id, oFlag) === 4);
+
+  // Export builders must surface a holiday-day vacation/sick entry in the Leaves row, exactly
+  // like they already do for a vacation-log entry.
+  g.schedule[wkReal][id][0] = 'sick';
+  const memberFirst = g.MEMBERS.find((m) => m.id === id).first;
+  let sheetTsv, tsv;
+  try { sheetTsv = g.buildSheetTSV(oReal); } catch (e) { check('buildSheetTSV does not throw with a holiday-day sick entry', false, e.stack); }
+  try { tsv = g.buildTSV(oReal, 'local'); } catch (e) { check('buildTSV does not throw with a holiday-day sick entry', false, e.stack); }
+  check('buildSheetTSV Leaves row mentions the holiday-day sick member',
+    !!sheetTsv && sheetTsv.split('\n').some((line) => line.startsWith('Leaves') && line.indexOf(g.MEMBERS.find((m) => m.id === id).nick) !== -1));
+  check('buildTSV Leaves row mentions the holiday-day sick member',
+    !!tsv && tsv.split('\n').some((line) => line.startsWith('Leaves') && line.indexOf(memberFirst) !== -1));
 })();
 
 // ===========================================================================
