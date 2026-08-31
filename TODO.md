@@ -58,12 +58,19 @@ wholesale (`lockedWeeks=new Set(state.lockedWeeks)`), same as `vacationLog`/
 `MEMBERS`, instead of only ever adding to it. Remote sets the baseline; local
 (if present) authoritatively overrides it with this browser's own saved state.
 
-### - [ ] 4. `buildSuggestion` erases leave for next week
+### - [x] 4. `buildSuggestion` erases leave for next week
 
 `buildSuggestion` (~L425, L458) initialises the whole next week to `'off'` for
 every member and assigns it wholesale, wiping any `vacation`/`sick`/`otherteam`
 already stamped there from the vacation log — after which the log and the grid
 disagree. Preserve non-`'off'`/`'wfh'` states. Same for `regenSuggestion` (~L460).
+
+Fixed 2026-08-31: `buildSuggestion` now reads whatever's already in
+`schedule[wkKey(next)]` and carries forward any day already committed as
+`vacation`/`sick`/`otherteam`, excluding it from the WFH-candidate pool and
+the always-office desk count. `regenSuggestion` no longer deletes the week
+outright before re-rolling — it just re-runs `buildSuggestion`, which now
+preserves real commitments while still re-randomizing the WFH picks.
 
 ---
 

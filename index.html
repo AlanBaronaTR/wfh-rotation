@@ -431,13 +431,17 @@ function trailsIntoWeekend(id,o){var s=getSched(o),hd=getHols(o).map(function(h)
 function rotateShiftsForNext(from){var next=from+1,act=activeMembers(next),order=act.map(function(m){return m.id;}),n=order.length,k=wkKey(next);if(n===0)return;if(!splitActive(next)){weekShift[k]={};MEMBERS.forEach(function(m){weekShift[k][m.id]='10';});return;}var curLate=order.filter(function(id){return splitActive(from)&&memberInWeek(id,from)&&getWeekShift(from,id)==='11';});var lateCount=curLate.length||2;var maxIdx=-1;curLate.forEach(function(id){maxIdx=Math.max(maxIdx,order.indexOf(id));});var start=(maxIdx+1)%n;var lateSet=new Set();for(var i=0;i<lateCount;i++){lateSet.add(order[(start+i)%n]);}weekShift[k]={};MEMBERS.forEach(function(m){weekShift[k][m.id]=lateSet.has(m.id)?'11':'10';});}
 function buildSuggestion(from){
   var next=from+1,act=activeMembers(next),cur=getSched(from),nhd=getHols(next).map(function(h){return h.day;}),ns={};
-  MEMBERS.forEach(function(m){ns[m.id]=Array(5).fill('off');});
+  // Carry forward any day already committed via the vacation/other-team log (or a previous
+  // suggestion's own preserved days) before the rotation picks WFH days -- otherwise this
+  // wholesale rebuild silently erases real vacation/sick/otherteam commitments for next week.
+  var existing=schedule[wkKey(next)];
+  MEMBERS.forEach(function(m){var ex=existing&&existing[m.id];ns[m.id]=Array.from({length:5},function(_,d){return(ex&&ex[d]&&ex[d]!=='off'&&ex[d]!=='wfh')?ex[d]:'off';});});
   // alwaysOffice members stay office (no WFH)
   var rotatable=act.filter(function(m){return!m.alwaysOffice;});
   var alwaysOfficeMems=act.filter(function(m){return m.alwaysOffice;});
-  // Count desks used by alwaysOffice members per day
+  // Count desks used by alwaysOffice members per day (skip a day already preserved as away)
   var desksUsed=Array(5).fill(0);
-  for(var d0=0;d0<5;d0++){alwaysOfficeMems.forEach(function(m){if(!isPreJoin(m.id,next,d0)&&!nhd.includes(d0))desksUsed[d0]++;});}
+  for(var d0=0;d0<5;d0++){alwaysOfficeMems.forEach(function(m){if(!isPreJoin(m.id,next,d0)&&!nhd.includes(d0)&&ns[m.id][d0]==='off')desksUsed[d0]++;});}
   var maxInOffice=Array(5).fill(0);for(var d1=0;d1<5;d1++){maxInOffice[d1]=Math.max(0,DESKS-desksUsed[d1]);}
   // For rotatable members: assign WFH days
   // Target: 2 WFH days per person, respecting desk limit
@@ -449,6 +453,7 @@ function buildSuggestion(from){
     var dayCounts=Array(5).fill(0);
     for(var w=1;w<=4;w++){var ps=schedule[wkKey(from-w)];if(ps&&ps[m.id])ps[m.id].forEach(function(s,d){if(s==='wfh')dayCounts[d]++;});}
     dayCounts.forEach(function(c,d){if(c>=2)fb.add(d);});
+    for(var dPre=0;dPre<5;dPre++){if(ns[m.id][dPre]!=='off')fb.add(dPre);} // already preserved as vacation/sick/otherteam
     var cands=[0,1,2,3,4].filter(function(d){return!fb.has(d)&&!nhd.includes(d)&&!isPreJoin(m.id,next,d);});
     var chosen=[...cands].sort(function(){return Math.random()-0.5;}).slice(0,Math.min(n2,cands.length));
     if(chosen.length<n2){var fl=[0,1,2,3,4].filter(function(d){return!nhd.includes(d)&&!chosen.includes(d)&&!isPreJoin(m.id,next,d);});chosen.push(...fl.sort(function(){return Math.random()-0.5;}).slice(0,n2-chosen.length));}
@@ -466,7 +471,7 @@ function buildSuggestion(from){
   }
   schedule[wkKey(next)]=ns;rotateShiftsForNext(from);shiftOv[wkKey(next)]={};suggestedOffset=next;wkOffset=next;setView('week');
 }
-function regenSuggestion(){var f=wkOffset-1;delete schedule[wkKey(wkOffset)];delete weekShift[wkKey(wkOffset)];buildSuggestion(f);}
+function regenSuggestion(){var f=wkOffset-1;delete weekShift[wkKey(wkOffset)];buildSuggestion(f);}
 function toggleExport(){showExport=!showExport;showCopy=false;showTeams=false;render();}
 function toggleCopy(){showCopy=!showCopy;showExport=false;showTeams=false;render();}
 function toggleTeams(){showTeams=!showTeams;showCopy=false;showExport=false;render();}

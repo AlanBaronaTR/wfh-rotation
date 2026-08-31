@@ -1256,6 +1256,36 @@ function makeFakeHandle(mode) {
   check('an explicit local unlock must survive being merged with the still-locked remote state', !g10.lockedWeeks.has(wkLock));
 
   // ===========================================================================
+  // 17. buildSuggestion()/regenSuggestion() must not erase a pre-existing
+  //     vacation/sick/otherteam day when generating next week's rotation
+  //     (TODO.md #4). buildSuggestion() built the whole next week from
+  //     scratch starting at all-'off' and unconditionally overwrote
+  //     schedule[wkKey(next)] with it, silently wiping out any day already
+  //     stamped by the vacation log -- and regenSuggestion() made it worse
+  //     by deleting the week outright before rebuilding.
+  // ===========================================================================
+  const g11 = makeSandbox();
+  const o11 = 100;
+  const next11 = o11 + 1;
+  const wkNext11 = g11.wkKey(next11);
+
+  // Carlos already has a vacation logged for Monday of next week (stamped into
+  // schedule ahead of time, exactly like the vacation log does) before anyone
+  // clicks "Suggest next week".
+  g11.schedule[wkNext11] = {};
+  g11.MEMBERS.forEach((m) => { g11.schedule[wkNext11][m.id] = Array(5).fill('off'); });
+  g11.schedule[wkNext11].carlos[0] = 'vacation';
+
+  g11.buildSuggestion(o11);
+  check('buildSuggestion preserves a pre-existing vacation day instead of erasing it', g11.schedule[wkNext11].carlos[0] === 'vacation');
+
+  // Regenerating the suggestion (re-rolling the random WFH picks) must not
+  // erase the same pre-existing vacation day either.
+  g11.wkOffset = next11;
+  g11.regenSuggestion();
+  check('regenSuggestion preserves the same pre-existing vacation day across a re-roll', g11.schedule[wkNext11].carlos[0] === 'vacation');
+
+  // ===========================================================================
   // Summary
   // ===========================================================================
   console.log('\n' + passes + ' passed, ' + failures + ' failed.');
