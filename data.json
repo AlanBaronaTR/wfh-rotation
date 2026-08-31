@@ -41,7 +41,7 @@
       "initials": "MC",
       "av": "#FED7AA",
       "ac": "#EA580C",
-      "shift": "10",
+      "shift": "11",
       "hideable": true
     },
     {
@@ -90,7 +90,7 @@
       "initials": "AB",
       "av": "#BEF264",
       "ac": "#3F6212",
-      "shift": "10",
+      "shift": "11",
       "hideable": true
     }
   ],
@@ -145,7 +145,7 @@
         "off",
         "off",
         "off",
-        "wfh"
+        "off"
       ],
       "mafe": [
         "off",
@@ -169,11 +169,11 @@
         "off"
       ],
       "ricardo": [
-        "vacation",
-        "vacation",
-        "vacation",
-        "vacation",
-        "vacation"
+        "otherteam",
+        "otherteam",
+        "otherteam",
+        "otherteam",
+        "otherteam"
       ],
       "alan": [
         "vacation",
@@ -203,7 +203,7 @@
         "off",
         "off",
         "off",
-        "vacation"
+        "off"
       ],
       "mafe": [
         "wfh",
@@ -1087,9 +1087,9 @@
         "off"
       ],
       "ricardo": [
-        "off",
-        "off",
-        "off",
+        "otherteam",
+        "otherteam",
+        "otherteam",
         "off",
         "off"
       ],
@@ -1612,9 +1612,9 @@
     "2026-09-21": {
       "karen": [
         "off",
-        "wfh",
         "off",
-        "wfh",
+        "off",
+        "off",
         "off"
       ],
       "mafe": [
@@ -1639,11 +1639,11 @@
         "wfh"
       ],
       "ricardo": [
-        "wfh",
-        "off",
-        "wfh",
-        "off",
-        "off"
+        "otherteam",
+        "otherteam",
+        "otherteam",
+        "otherteam",
+        "otherteam"
       ],
       "perla": [
         "off",
@@ -2982,6 +2982,13 @@
       "start": "2026-11-27",
       "end": "2026-11-27",
       "note": ""
+    },
+    {
+      "id": "ricardo",
+      "start": "2026-09-08",
+      "end": "2026-09-30",
+      "note": "Elections team (training)",
+      "type": "otherteam"
     }
   ],
   "hiddenByWeek": {
@@ -2992,13 +2999,11 @@
     ],
     "2026-09-07": [
       "ricardo_int",
-      "perla",
-      "ricardo"
+      "perla"
     ],
     "2026-09-14": [
       "ricardo_int",
-      "perla",
-      "ricardo"
+      "perla"
     ],
     "2026-08-31": [
       "perla",
@@ -3006,7 +3011,7 @@
     ]
   },
   "shiftTZ": "mx",
-  "publishedAt": "2026-08-31T03:45:23.096Z",
+  "publishedAt": "2026-08-31T04:21:26.812Z",
   "publishLog": [
     {
       "at": "2026-08-31T01:40:31.731Z",
@@ -3018,6 +3023,18 @@
     },
     {
       "at": "2026-08-31T03:45:23.096Z",
+      "note": ""
+    },
+    {
+      "at": "2026-08-31T04:12:09.235Z",
+      "note": ""
+    },
+    {
+      "at": "2026-08-31T04:12:21.982Z",
+      "note": ""
+    },
+    {
+      "at": "2026-08-31T04:21:26.812Z",
       "note": ""
     }
   ]

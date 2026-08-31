@@ -487,12 +487,18 @@ function stampVacation(entry,status){
   }
 }
 var editingVacationIdx=null; // index into vacationLog currently being edited, or null when adding new
+// The add/edit form's currently-selected entry type. A plain <select> defaulted silently to
+// "Vacation" and was easy to leave unchanged by mistake (an entry meant as "other team" got
+// logged as a vacation) — tracked as explicit state behind a visible toggle instead, see
+// vacTypeToggleHTML()/setVacType().
+var vacTypeSelection='vacation';
+function setVacType(t){vacTypeSelection=t;render();}
 function addVacation(){
   var id=document.getElementById('vac-member').value;
   var start=document.getElementById('vac-start').value;
   var end=document.getElementById('vac-end').value||start;
   var note=document.getElementById('vac-note').value.trim();
-  var type=document.getElementById('vac-type').value||'vacation'; // 'vacation' | 'otherteam'
+  var type=vacTypeSelection; // 'vacation' | 'otherteam' — set via the visible toggle, not a hidden default
   if(!id||!start)return;
   if(end<start){alert('End date must be on or after start date.');return;}
   var entry={id:id,start:start,end:end,note:note,type:type};
@@ -500,6 +506,7 @@ function addVacation(){
   stampVacation(entry,type);
   document.getElementById('vac-note').value='';
   document.getElementById('vac-end').value='';
+  vacTypeSelection='vacation';
   render();
 }
 function removeVacation(idx){
@@ -509,14 +516,14 @@ function removeVacation(idx){
   if(!confirm('Remove '+typeLabel+' for '+MEMBERS.find(function(m){return m.id===entry.id;}).first+' ('+entry.start+' to '+entry.end+')? Days will revert to office.'))return;
   stampVacation(entry,'off');
   vacationLog.splice(idx,1);
-  if(editingVacationIdx===idx)editingVacationIdx=null;
+  if(editingVacationIdx===idx){editingVacationIdx=null;vacTypeSelection='vacation';}
   else if(editingVacationIdx!==null&&editingVacationIdx>idx)editingVacationIdx--;
   render();
 }
 // Editing loads the entry's current values into the same add-form (so the whole date range can be
 // adjusted in one place — add/remove days or weeks — instead of deleting and re-creating entries.
-function startEditVacation(idx){if(!vacationLog[idx])return;editingVacationIdx=idx;render();}
-function cancelEditVacation(){editingVacationIdx=null;render();}
+function startEditVacation(idx){if(!vacationLog[idx])return;editingVacationIdx=idx;vacTypeSelection=vacationLog[idx].type||'vacation';render();}
+function cancelEditVacation(){editingVacationIdx=null;vacTypeSelection='vacation';render();}
 function saveVacationEdit(){
   var idx=editingVacationIdx;
   var entry=vacationLog[idx];
@@ -525,7 +532,7 @@ function saveVacationEdit(){
   var start=document.getElementById('vac-start').value;
   var end=document.getElementById('vac-end').value||start;
   var note=document.getElementById('vac-note').value.trim();
-  var type=document.getElementById('vac-type').value||'vacation';
+  var type=vacTypeSelection;
   if(!id||!start)return;
   if(end<start){alert('End date must be on or after start date.');return;}
   stampVacation(entry,'off'); // clear the OLD range first (covers a shrunk range or a changed member)
@@ -534,6 +541,7 @@ function saveVacationEdit(){
   editingVacationIdx=null;
   document.getElementById('vac-note').value='';
   document.getElementById('vac-end').value='';
+  vacTypeSelection='vacation';
   render();
 }
 function doDownload(){}
@@ -1059,9 +1067,10 @@ function renderWeekGrid(o,dates,sched,hols,holDays,locked,act,split,wfhPD,fmt){
   // with its current values) so the range can be adjusted — add/remove days or weeks — in place,
   // instead of deleting and re-creating entries.
   var editingVacEntry=editingVacationIdx!==null?vacationLog[editingVacationIdx]:null;
+  var vacTypeBtn=function(t,label,activeBg,activeBd,icoName){var active=vacTypeSelection===t;return'<button type="button" onclick="setVacType(\''+t+'\')" style="font-size:12px;padding:5px 10px;border-radius:6px;border:1.5px solid '+(active?activeBd:'var(--color-border-secondary)')+';cursor:pointer;background:'+(active?activeBg:'var(--color-background-primary)')+';color:'+(active?'#fff':'var(--color-text-secondary)')+';font-weight:'+(active?'600':'400')+';display:inline-flex;align-items:center;gap:4px;">'+ico(icoName,11)+' '+label+'</button>';};
   var vacHtml='<div style="margin-top:14px;"><div class="section-title">'+ico('beach',14)+' Vacation & other-team log</div><div class="hol-form">';
   if(editingVacEntry)vacHtml+='<div style="font-size:11px;font-weight:500;color:#0C447C;margin-bottom:6px;">'+ico('edit',11)+' Editing this entry — change dates/member/note below, then Save.</div>';
-  vacHtml+='<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;"><select id="vac-member" style="font-size:12px;padding:5px 8px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);">'+MEMBERS.map(function(m){return'<option value="'+m.id+'"'+(editingVacEntry&&editingVacEntry.id===m.id?' selected':'')+'>'+m.first+'</option>';}).join('')+'</select><select id="vac-type" style="font-size:12px;padding:5px 8px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);"><option value="vacation"'+(editingVacEntry&&editingVacEntry.type==='vacation'?' selected':'')+'>Vacation</option><option value="otherteam"'+(editingVacEntry&&editingVacEntry.type==='otherteam'?' selected':'')+'>Other team</option></select><label style="font-size:11px;color:var(--color-text-secondary);">From</label><input type="date" id="vac-start" value="'+(editingVacEntry?editingVacEntry.start:'')+'" onchange="vacStartChanged()" style="font-size:12px;padding:4px 6px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);" /><label style="font-size:11px;color:var(--color-text-tertiary);">To <span style="font-size:10px;">(optional)</span></label><input type="date" id="vac-end" value="'+(editingVacEntry?editingVacEntry.end:'')+'" style="font-size:12px;padding:4px 6px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);" /><input id="vac-note" placeholder="Note (optional)" value="'+(editingVacEntry?(editingVacEntry.note||'').replace(/"/g,'&quot;'):'')+'" style="flex:1;min-width:100px;font-size:12px;padding:5px 8px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);" />';
+  vacHtml+='<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;"><select id="vac-member" style="font-size:12px;padding:5px 8px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);">'+MEMBERS.map(function(m){return'<option value="'+m.id+'"'+(editingVacEntry&&editingVacEntry.id===m.id?' selected':'')+'>'+m.first+'</option>';}).join('')+'</select><span style="display:flex;gap:4px;">'+vacTypeBtn('vacation','Vacation','#D97706','#B45309','beach')+vacTypeBtn('otherteam','Other team','#4F46E5','#4338CA','pin')+'</span><label style="font-size:11px;color:var(--color-text-secondary);">From</label><input type="date" id="vac-start" value="'+(editingVacEntry?editingVacEntry.start:'')+'" onchange="vacStartChanged()" style="font-size:12px;padding:4px 6px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);" /><label style="font-size:11px;color:var(--color-text-tertiary);">To <span style="font-size:10px;">(optional)</span></label><input type="date" id="vac-end" value="'+(editingVacEntry?editingVacEntry.end:'')+'" style="font-size:12px;padding:4px 6px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);" /><input id="vac-note" placeholder="Note (optional)" value="'+(editingVacEntry?(editingVacEntry.note||'').replace(/"/g,'&quot;'):'')+'" style="flex:1;min-width:100px;font-size:12px;padding:5px 8px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);" />';
   if(editingVacEntry){
     vacHtml+='<button class="add-btn" onclick="saveVacationEdit()">'+ico('check',12)+' Save changes</button><button style="font-size:12px;padding:5px 10px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:none;cursor:pointer;color:var(--color-text-secondary);" onclick="cancelEditVacation()">Cancel</button>';
   }else{

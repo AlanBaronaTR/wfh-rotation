@@ -874,7 +874,7 @@ function makeSandbox() {
   g.document.getElementById('vac-start').value = '2026-09-07';
   g.document.getElementById('vac-end').value = '2026-09-11';
   g.document.getElementById('vac-note').value = 'with platform team';
-  g.document.getElementById('vac-type').value = 'otherteam';
+  g.setVacType('otherteam');
   try { g.addVacation(); } catch (e) { check('addVacation() with type=otherteam does not throw', false, e.stack); }
   const entry = g.vacationLog[g.vacationLog.length - 1];
   check("addVacation() records the entry with type 'otherteam'", !!entry && entry.type === 'otherteam');
@@ -893,7 +893,7 @@ function makeSandbox() {
   g2.document.getElementById('vac-member').value = 'karen';
   g2.document.getElementById('vac-start').value = '2026-10-05';
   g2.document.getElementById('vac-end').value = '2026-10-05';
-  g2.document.getElementById('vac-type').value = 'vacation';
+  g2.setVacType('vacation');
   g2.addVacation();
   const vacEntry = g2.vacationLog[g2.vacationLog.length - 1];
   check("a normal vacation entry keeps type 'vacation'", vacEntry.type === 'vacation');
@@ -910,7 +910,7 @@ function makeSandbox() {
   g.document.getElementById('vac-member').value = id;
   g.document.getElementById('vac-start').value = '2026-09-07';
   g.document.getElementById('vac-end').value = '2026-09-11';
-  g.document.getElementById('vac-type').value = 'otherteam';
+  g.setVacType('otherteam');
   g.addVacation();
   const idx = g.vacationLog.length - 1;
 
@@ -920,7 +920,7 @@ function makeSandbox() {
   g.document.getElementById('vac-member').value = id;
   g.document.getElementById('vac-start').value = '2026-09-07';
   g.document.getElementById('vac-end').value = '2026-09-18'; // now two full weeks
-  g.document.getElementById('vac-type').value = 'otherteam';
+  g.setVacType('otherteam');
   try { g.saveVacationEdit(); } catch (e) { check('saveVacationEdit() does not throw (extend)', false, e.stack); }
   check('saveVacationEdit() extends the range — original week still otherteam',
     g.schedule['2026-09-07'][id].every((v) => v === 'otherteam'));
@@ -935,7 +935,7 @@ function makeSandbox() {
   g.document.getElementById('vac-member').value = id;
   g.document.getElementById('vac-start').value = '2026-09-07';
   g.document.getElementById('vac-end').value = '2026-09-11';
-  g.document.getElementById('vac-type').value = 'otherteam';
+  g.setVacType('otherteam');
   g.saveVacationEdit();
   check('shrinking the range reverts the dropped week to off',
     g.schedule['2026-09-14'][id].every((v) => v === 'off'));
@@ -947,7 +947,7 @@ function makeSandbox() {
   g.document.getElementById('vac-member').value = 'karen';
   g.document.getElementById('vac-start').value = '2026-09-07';
   g.document.getElementById('vac-end').value = '2026-09-11';
-  g.document.getElementById('vac-type').value = 'otherteam';
+  g.setVacType('otherteam');
   g.saveVacationEdit();
   check("changing the member during edit reverts the OLD member's days", g.schedule['2026-09-07'][id].every((v) => v === 'off'));
   check('changing the member during edit stamps the NEW member', g.schedule['2026-09-07'].karen.every((v) => v === 'otherteam'));
@@ -976,6 +976,45 @@ function makeSandbox() {
   g2.removeVacation(0); // remove karen's entry (index 0), shifting mafe's entry to index 0
   check('editingVacationIdx shifts down when an earlier entry is removed', g2.editingVacationIdx === 0);
   check('the entry still being edited is still mafe\'s', g2.vacationLog[g2.editingVacationIdx].id === 'mafe');
+})();
+
+// ===========================================================================
+// 12b. The vacation/other-team type is a visible toggle, not a silently-
+//      defaulted <select> — this is the exact bug that shipped once already
+//      (an entry meant as "other team" got logged as a vacation because the
+//      dropdown defaulted to Vacation and nothing made that obvious).
+// ===========================================================================
+(function vacTypeToggleChecks() {
+  const g = makeSandbox();
+  check("vacTypeSelection defaults to 'vacation'", g.vacTypeSelection === 'vacation');
+
+  g.wkOffset = 0;
+  g.render();
+  let panel = g.document.getElementById('vacation-section').innerHTML;
+  check('the type toggle renders two distinct buttons, not a hidden/silent default',
+    panel.indexOf("setVacType('vacation')") !== -1 && panel.indexOf("setVacType('otherteam')") !== -1);
+
+  g.setVacType('otherteam');
+  check('setVacType updates the selection', g.vacTypeSelection === 'otherteam');
+  g.render();
+  panel = g.document.getElementById('vacation-section').innerHTML;
+  check('after selecting Other team, that button visibly shows as active (distinct styling)',
+    (panel.match(/font-weight:600/g) || []).length >= 1);
+
+  // Adding an entry without touching the toggle must still default to vacation (intentional,
+  // documented default) — but selecting otherteam first must actually produce an otherteam entry.
+  g.document.getElementById('vac-member').value = 'karen';
+  g.document.getElementById('vac-start').value = '2026-11-02';
+  g.addVacation();
+  check('selecting Other team before Add produces an otherteam entry', g.vacationLog[g.vacationLog.length - 1].type === 'otherteam');
+  check('the toggle resets to vacation after a successful add (ready for the next entry)', g.vacTypeSelection === 'vacation');
+
+  // Editing an entry must load the toggle to match that entry's actual type.
+  const idx = g.vacationLog.length - 1;
+  g.startEditVacation(idx);
+  check('editing an otherteam entry sets the toggle to otherteam', g.vacTypeSelection === 'otherteam');
+  g.cancelEditVacation();
+  check('cancelling resets the toggle back to vacation', g.vacTypeSelection === 'vacation');
 })();
 
 // ===========================================================================
