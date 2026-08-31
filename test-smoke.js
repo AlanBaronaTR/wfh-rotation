@@ -1034,10 +1034,13 @@ function makeSandbox() {
 })();
 
 // ===========================================================================
-// 12c. An 'otherteam' assignment must never override — or, on removal, clobber
-//      — an existing vacation/sick day or a genuine (excused) holiday. This is
-//      exactly the bug that shipped: a wide otherteam range silently erased a
-//      narrower pre-existing vacation entry and a Mexican public holiday.
+// 12c. A genuine (excused) holiday is never bulk-overwritten by the vacation/
+//      other-team log, for ANY entry type — it's a company-wide day off, not
+//      something a personal vacation or other-team assignment should relabel.
+//      An 'otherteam' assignment additionally must never override — or, on
+//      removal, clobber — an existing vacation/sick day. This is exactly the
+//      bug that shipped: a wide otherteam range silently erased a narrower
+//      pre-existing vacation entry and a Mexican public holiday underneath it.
 // ===========================================================================
 (function otherTeamPriorityChecks() {
   const g = makeSandbox();
@@ -1067,19 +1070,23 @@ function makeSandbox() {
   check('reverting otherteam leaves the genuine holiday day untouched (still off)', g.schedule[wk][id][3] === 'off');
   check('reverting otherteam correctly clears the mandateApplies-holiday day it DID apply to', g.schedule[wk][id][4] === 'off');
 
-  // A plain 'vacation'-type entry must be unaffected by this priority logic — it still overwrites
-  // whatever was there, matching its existing (unchanged) behavior.
+  // A plain 'vacation'-type entry still overwrites an existing vacation/sick day (unchanged
+  // behavior — a re-log for the same person is expected to win), but it must NOT overwrite a
+  // genuine holiday day: that's the reported bug (Sept 16 showing as Vacation instead of Holiday
+  // because it fell inside a wider vacation date range). A mandateApplies holiday, not being
+  // excused for anyone, is still fair game for a vacation entry same as before.
   const g2 = makeSandbox();
   const o2 = 61;
   const wk2 = g2.wkKey(o2);
   g2.schedule[wk2] = {};
   g2.MEMBERS.forEach((m) => { g2.schedule[wk2][m.id] = Array(5).fill('off'); });
   g2.schedule[wk2][id] = ['sick', 'off', 'off', 'off', 'off'];
-  g2.holidays[wk2] = [{ day: 1, name: 'Genuine Holiday' }];
+  g2.holidays[wk2] = [{ day: 1, name: 'Genuine Holiday' }, { day: 2, name: 'US Holiday', mandateApplies: true }];
   const vacEntry = { id: id, start: g2.wkKey(o2), end: g2.dStr(g2.wkDates(o2)[4]), type: 'vacation' };
   g2.stampVacation(vacEntry, 'vacation');
   check('a plain vacation entry still overwrites an existing sick day (unchanged behavior)', g2.schedule[wk2][id][0] === 'vacation');
-  check('a plain vacation entry still overwrites a genuine holiday day (unchanged behavior)', g2.schedule[wk2][id][1] === 'vacation');
+  check('a plain vacation entry does NOT override a genuine holiday day (stays off/Holiday)', g2.schedule[wk2][id][1] === 'off');
+  check('a plain vacation entry DOES apply on a mandateApplies (US) holiday day', g2.schedule[wk2][id][2] === 'vacation');
 })();
 
 // ===========================================================================

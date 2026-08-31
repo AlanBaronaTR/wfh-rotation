@@ -476,11 +476,18 @@ function setCopyMode(mode){copyMode=mode;render();}
 function dismissAlert(key){dismissedAlerts.add(key);var el=document.getElementById('alert-'+key);if(el)el.style.display='none';}
 // ===== VACATION LOG =====
 function stampVacation(entry,status){
-  // An 'otherteam' assignment must never override — or, when the entry is later removed/shrunk,
-  // clobber — a day that's already vacation/sick, or a genuine (excused) Mexican holiday. Those
-  // represent "not here at all", which takes priority over "here, but with a different team".
-  // This applies the same way whether we're applying 'otherteam' or reverting it back to 'off',
-  // so a day that was correctly left untouched at apply time is also left untouched on removal.
+  // A genuine (excused) Mexican holiday is a company-wide day off — it's never bulk-overwritten by
+  // the vacation/other-team log, regardless of entry type, so it keeps showing as Holiday rather
+  // than being relabeled as someone's personal vacation or blended with an other-team assignment.
+  // A mandateApplies (e.g. US) holiday isn't excused for anyone here, so it stays fair game for
+  // either entry type, same as before. This applies identically whether we're applying an entry or
+  // reverting it (status='off'), so a day left untouched at apply time is also left untouched on
+  // removal.
+  //
+  // An 'otherteam' assignment additionally must never override — or, on removal, clobber — a day
+  // that's already vacation/sick. Those represent "not here at all", which outranks "here, but with
+  // a different team". A plain vacation/sick re-log is still allowed to overwrite an existing
+  // vacation/sick/otherteam day normally.
   var isOtherTeamEntry=entry.type==='otherteam';
   var start=new Date(entry.start+'T12:00:00'),end=new Date(entry.end+'T12:00:00');
   for(var d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
@@ -490,11 +497,11 @@ function stampVacation(entry,status){
     var wk=dStr(monday);
     if(!schedule[wk]){schedule[wk]={};MEMBERS.forEach(function(m){schedule[wk][m.id]=Array(5).fill('off');});}
     if(!schedule[wk][entry.id])continue;
+    var hol=(holidays[wk]||[]).find(function(h){return h.day===dayIdx;});
+    if(hol&&!hol.mandateApplies)continue;
     if(isOtherTeamEntry){
       var cur=schedule[wk][entry.id][dayIdx];
       if(cur==='vacation'||cur==='sick')continue;
-      var hol=(holidays[wk]||[]).find(function(h){return h.day===dayIdx;});
-      if(hol&&!hol.mandateApplies)continue;
     }
     schedule[wk][entry.id][dayIdx]=status;
   }
