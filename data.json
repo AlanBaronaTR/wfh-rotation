@@ -1057,64 +1057,6 @@
         "off"
       ]
     },
-    "2026-09-21": {
-      "karen": [
-        "wfh",
-        "wfh",
-        "wfh",
-        "off",
-        "wfh"
-      ],
-      "mafe": [
-        "off",
-        "wfh",
-        "wfh",
-        "off",
-        "off"
-      ],
-      "carlos": [
-        "off",
-        "wfh",
-        "off",
-        "wfh",
-        "off"
-      ],
-      "miriam": [
-        "off",
-        "wfh",
-        "off",
-        "off",
-        "wfh"
-      ],
-      "ricardo": [
-        "off",
-        "off",
-        "wfh",
-        "wfh",
-        "off"
-      ],
-      "perla": [
-        "off",
-        "off",
-        "off",
-        "off",
-        "off"
-      ],
-      "ricardo_int": [
-        "off",
-        "off",
-        "off",
-        "off",
-        "off"
-      ],
-      "alan": [
-        "wfh",
-        "wfh",
-        "off",
-        "wfh",
-        "off"
-      ]
-    },
     "2026-09-28": {
       "karen": [
         "off",
@@ -1666,6 +1608,64 @@
         "off",
         "off"
       ]
+    },
+    "2026-09-21": {
+      "karen": [
+        "off",
+        "wfh",
+        "off",
+        "wfh",
+        "off"
+      ],
+      "mafe": [
+        "off",
+        "wfh",
+        "wfh",
+        "off",
+        "off"
+      ],
+      "carlos": [
+        "off",
+        "off",
+        "off",
+        "wfh",
+        "wfh"
+      ],
+      "miriam": [
+        "wfh",
+        "wfh",
+        "off",
+        "off",
+        "wfh"
+      ],
+      "ricardo": [
+        "wfh",
+        "off",
+        "wfh",
+        "off",
+        "off"
+      ],
+      "perla": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "ricardo_int": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off"
+      ],
+      "alan": [
+        "off",
+        "wfh",
+        "off",
+        "wfh",
+        "off"
+      ]
     }
   },
   "holidays": {
@@ -1830,16 +1830,6 @@
       "perla": "10",
       "ricardo_int": "10"
     },
-    "2026-09-21": {
-      "karen": "11",
-      "mafe": "11",
-      "carlos": "10",
-      "miriam": "10",
-      "ricardo": "10",
-      "perla": "10",
-      "ricardo_int": "10",
-      "alan": "10"
-    },
     "2026-09-28": {
       "karen": "10",
       "mafe": "10",
@@ -1920,6 +1910,16 @@
       "carlos": "8",
       "miriam": "10",
       "ricardo": "8",
+      "alan": "10"
+    },
+    "2026-09-21": {
+      "karen": "11",
+      "mafe": "11",
+      "carlos": "10",
+      "miriam": "10",
+      "ricardo": "8",
+      "perla": "10",
+      "ricardo_int": "10",
       "alan": "10"
     }
   },
@@ -3006,7 +3006,7 @@
     ]
   },
   "shiftTZ": "mx",
-  "publishedAt": "2026-08-31T03:15:22.139Z",
+  "publishedAt": "2026-08-31T03:45:23.096Z",
   "publishLog": [
     {
       "at": "2026-08-31T01:40:31.731Z",
@@ -3014,6 +3014,10 @@
     },
     {
       "at": "2026-08-31T03:15:22.139Z",
+      "note": ""
+    },
+    {
+      "at": "2026-08-31T03:45:23.096Z",
       "note": ""
     }
   ]
