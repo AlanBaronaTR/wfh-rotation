@@ -114,11 +114,11 @@ var DEFAULT_MEMBERS=[
   {id:'karen',name:'Karen Alfaro',first:'Karen',nick:'Karen',initials:'KA',av:'#93C5FD',ac:'#1E40AF',shift:'10',hideable:true},
   {id:'mafe',name:'Mafer Brea',first:'Mafer',nick:'Mafer',initials:'MF',av:'#E9D5FF',ac:'#7C3AED',shift:'10',hideable:true},
   {id:'carlos',name:'Carlos Hernández',first:'Carlos',nick:'Carlos',initials:'CH',av:'#CBD5E1',ac:'#334155',shift:'10',hideable:true},
-  {id:'miriam',name:'Miriam Cornejo',first:'Miriam',nick:'Miriam',initials:'MC',av:'#FED7AA',ac:'#EA580C',shift:'11',hideable:true},
+  {id:'miriam',name:'Miriam Cornejo',first:'Miriam',nick:'Miriam',initials:'MC',av:'#FED7AA',ac:'#EA580C',shift:'10',hideable:true},
   {id:'ricardo',name:'Ricardo García',first:'Ricardo',nick:'Ricardo',initials:'RG',av:'#FEF08A',ac:'#A16207',shift:'10',joinDate:'2026-07-01',hideable:true},
   {id:'perla',name:'Perla Velasco',first:'Perla',nick:'Perla',initials:'PV',av:'#FBCFE8',ac:'#DB2777',shift:'10',joinDate:'2026-08-21',hideable:true,alwaysOffice:true},
   {id:'ricardo_int',name:'Ricardo Gómez (intern)',first:'Ricardo (int.)',nick:'Ricardo(int)',initials:'RI',av:'#FECACA',ac:'#DC2626',shift:'10',joinDate:'2026-08-21',hideable:true,alwaysOffice:true},
-  {id:'alan',name:'Alan Barona',first:'Alan',nick:'Alan',initials:'AB',av:'#BEF264',ac:'#3F6212',shift:'11',hideable:true}
+  {id:'alan',name:'Alan Barona',first:'Alan',nick:'Alan',initials:'AB',av:'#BEF264',ac:'#3F6212',shift:'10',hideable:true}
 ];
 var MEMBERS=DEFAULT_MEMBERS.map(function(m){return Object.assign({},m);});
 var AVATAR_PALETTE=[
@@ -385,16 +385,18 @@ function stampVacation(entry,status){
     if(schedule[wk][entry.id])schedule[wk][entry.id][dayIdx]=status;
   }
 }
+var editingVacationIdx=null; // index into vacationLog currently being edited, or null when adding new
 function addVacation(){
   var id=document.getElementById('vac-member').value;
   var start=document.getElementById('vac-start').value;
   var end=document.getElementById('vac-end').value||start;
   var note=document.getElementById('vac-note').value.trim();
+  var type=document.getElementById('vac-type').value||'vacation'; // 'vacation' | 'otherteam'
   if(!id||!start)return;
   if(end<start){alert('End date must be on or after start date.');return;}
-  var entry={id:id,start:start,end:end,note:note};
+  var entry={id:id,start:start,end:end,note:note,type:type};
   vacationLog.push(entry);
-  stampVacation(entry,'vacation');
+  stampVacation(entry,type);
   document.getElementById('vac-note').value='';
   document.getElementById('vac-end').value='';
   render();
@@ -402,9 +404,35 @@ function addVacation(){
 function removeVacation(idx){
   var entry=vacationLog[idx];
   if(!entry)return;
-  if(!confirm('Remove vacation for '+MEMBERS.find(function(m){return m.id===entry.id;}).first+' ('+entry.start+' to '+entry.end+')? Days will revert to office.'))return;
+  var typeLabel=entry.type==='otherteam'?'other-team assignment':'vacation';
+  if(!confirm('Remove '+typeLabel+' for '+MEMBERS.find(function(m){return m.id===entry.id;}).first+' ('+entry.start+' to '+entry.end+')? Days will revert to office.'))return;
   stampVacation(entry,'off');
   vacationLog.splice(idx,1);
+  if(editingVacationIdx===idx)editingVacationIdx=null;
+  else if(editingVacationIdx!==null&&editingVacationIdx>idx)editingVacationIdx--;
+  render();
+}
+// Editing loads the entry's current values into the same add-form (so the whole date range can be
+// adjusted in one place — add/remove days or weeks — instead of deleting and re-creating entries.
+function startEditVacation(idx){if(!vacationLog[idx])return;editingVacationIdx=idx;render();}
+function cancelEditVacation(){editingVacationIdx=null;render();}
+function saveVacationEdit(){
+  var idx=editingVacationIdx;
+  var entry=vacationLog[idx];
+  if(!entry)return;
+  var id=document.getElementById('vac-member').value;
+  var start=document.getElementById('vac-start').value;
+  var end=document.getElementById('vac-end').value||start;
+  var note=document.getElementById('vac-note').value.trim();
+  var type=document.getElementById('vac-type').value||'vacation';
+  if(!id||!start)return;
+  if(end<start){alert('End date must be on or after start date.');return;}
+  stampVacation(entry,'off'); // clear the OLD range first (covers a shrunk range or a changed member)
+  entry.id=id;entry.start=start;entry.end=end;entry.note=note;entry.type=type;
+  stampVacation(entry,type); // then apply the (possibly extended/shifted) new range
+  editingVacationIdx=null;
+  document.getElementById('vac-note').value='';
+  document.getElementById('vac-end').value='';
   render();
 }
 function doDownload(){}
@@ -786,8 +814,15 @@ function render(){
     else{var shiftGroups={};SHIFT_ORDER.forEach(function(sid){var mems=act.filter(function(m){return memberDisplayShift(o,m.id)===sid;});if(mems.length>0)shiftGroups[sid]=mems;});var mixed=act.filter(function(m){return memberDisplayShift(o,m.id)==='mixed';});h+='<div style="display:flex;gap:8px;margin-bottom:'+(mixed.length?'6px':'10px')+';flex-wrap:wrap;">';Object.keys(shiftGroups).forEach(function(sid){var mems=shiftGroups[sid];var s=SHIFTS[sid];h+='<div style="flex:1;min-width:140px;background:'+s.bg+';border:0.5px solid '+s.bd+';border-radius:8px;padding:8px 12px;"><div style="font-size:11px;color:'+s.tx+';font-weight:500;">'+ico('clock',12)+' '+shiftTimeLabel(sid)+'</div><div style="font-size:12px;color:'+s.tx+';margin-top:3px;">'+mems.map(function(m){return m.first;}).join(', ')+' <span style="opacity:.6;">('+mems.length+')</span></div></div>';});h+='</div>';if(mixed.length)h+='<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:10px;">'+ico('shuffle',12)+' Mixed shifts: '+mixed.map(function(m){return m.first;}).join(', ')+'</div>';}
 
     // Alerts
-    wfhPD.forEach(function(c,i){if(c>2&&!holDays.includes(i)){var akey='wfh-'+o+'-'+i;if(!dismissedAlerts.has(akey))h+='<div class="alert" id="alert-'+akey+'" style="justify-content:space-between;">'+ico('warn',14)+'<span style="flex:1;"><strong>'+DAYS[i]+'</strong>: '+c+' people WFH — consider rebalancing.</span><button onclick="dismissAlert(\''+akey+'\')" style="background:none;border:none;cursor:pointer;color:#633806;font-size:14px;padding:0 2px;opacity:.6;">'+ico('x',12)+'</button></div>';}});
-    if(split)for(var d=0;d<5;d++){if(holDays.includes(d))continue;var inOffice=act.filter(function(m){return!isPreJoin(m.id,o,d)&&sched[m.id][d]==='off';});if(inOffice.length===0)continue;var hasLate=inOffice.some(function(m){return effShift(o,m.id,d)==='11';});if(!hasLate){var akey2='late-'+o+'-'+d;if(!dismissedAlerts.has(akey2))h+='<div class="alert" id="alert-'+akey2+'" style="justify-content:space-between;">'+ico('warn',14)+'<span style="flex:1;"><strong>'+DAYS[d]+'</strong>: no one on late shift (11–7) in office.</span><button onclick="dismissAlert(\''+akey2+'\')" style="background:none;border:none;cursor:pointer;color:#633806;font-size:14px;padding:0 2px;opacity:.6;">'+ico('x',12)+'</button></div>';}}
+    // Only flag a WFH day when it's a genuine majority of the active team (previously fired at
+    // any 3+, which was noise — 3 WFH out of a normal 7-8 person team is completely routine).
+    var wfhMajority=Math.floor(act.length/2);
+    wfhPD.forEach(function(c,i){if(c>wfhMajority&&!holDays.includes(i)){var akey='wfh-'+o+'-'+i;if(!dismissedAlerts.has(akey))h+='<div class="alert" id="alert-'+akey+'" style="justify-content:space-between;">'+ico('warn',14)+'<span style="flex:1;"><strong>'+DAYS[i]+'</strong>: '+c+' people WFH — consider rebalancing.</span><button onclick="dismissAlert(\''+akey+'\')" style="background:none;border:none;cursor:pointer;color:#633806;font-size:14px;padding:0 2px;opacity:.6;">'+ico('x',12)+'</button></div>';}});
+    // Only warn about missing late-shift coverage if someone is actually assigned to the late
+    // (11-7) band at all this week — if nobody works that shift right now (e.g. it's been rolled
+    // back), there's no coverage expectation to flag in the first place.
+    var anyoneOnLateShift=split&&act.some(function(m){for(var dd=0;dd<5;dd++){if(!isPreJoin(m.id,o,dd)&&effShift(o,m.id,dd)==='11')return true;}return false;});
+    if(anyoneOnLateShift)for(var d=0;d<5;d++){if(holDays.includes(d))continue;var inOffice=act.filter(function(m){return!isPreJoin(m.id,o,d)&&sched[m.id][d]==='off';});if(inOffice.length===0)continue;var hasLate=inOffice.some(function(m){return effShift(o,m.id,d)==='11';});if(!hasLate){var akey2='late-'+o+'-'+d;if(!dismissedAlerts.has(akey2))h+='<div class="alert" id="alert-'+akey2+'" style="justify-content:space-between;">'+ico('warn',14)+'<span style="flex:1;"><strong>'+DAYS[d]+'</strong>: no one on late shift (11–7) in office.</span><button onclick="dismissAlert(\''+akey2+'\')" style="background:none;border:none;cursor:pointer;color:#633806;font-size:14px;padding:0 2px;opacity:.6;">'+ico('x',12)+'</button></div>';}}
     // Desk limit alert
     var allAct=allActiveMembers(o);
     for(var d3=0;d3<5;d3++){var officeVal3=holDays.includes(d3)?'office':'off';var deskCount=allAct.filter(function(m){return!isPreJoin(m.id,o,d3)&&getSched(o)[m.id]&&getSched(o)[m.id][d3]===officeVal3;}).length;if(deskCount>DESKS){var akey3='desk-'+o+'-'+d3;if(!dismissedAlerts.has(akey3))h+='<div class="alert" id="alert-'+akey3+'" style="justify-content:space-between;background:#FEE2E2;border-color:#DC2626;color:#991B1B;">'+ico('warn',14)+'<span style="flex:1;"><strong>'+DAYS[d3]+'</strong>: '+deskCount+' in office — only '+DESKS+' desks available.</span><button onclick="dismissAlert(\''+akey3+'\')" style="background:none;border:none;cursor:pointer;color:#991B1B;font-size:14px;padding:0 2px;opacity:.6;">'+ico('x',12)+'</button></div>';}}
@@ -918,9 +953,21 @@ function renderWeekGrid(o,dates,sched,hols,holDays,locked,act,split,wfhPD,fmt){
   // Holidays
   document.getElementById('holiday-section').innerHTML='<div style="margin-top:14px;"><div class="section-title">'+ico('flag',14)+' Public holidays this week</div><div class="hol-form"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"><select id="hol-day" style="font-size:13px;padding:5px 8px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);">'+DAYS.map(function(d,i){return'<option value="'+i+'">'+d+'</option>';}).join('')+'</select><input id="hol-name" placeholder="Holiday name" style="flex:1;min-width:120px;font-size:13px;padding:5px 8px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);" /><button class="add-btn" onclick="addHoliday()">'+ico('plus',12)+' Add</button></div><div style="margin-top:7px;display:flex;flex-direction:column;gap:4px;">'+hols.map(function(hh){return'<div style="display:flex;align-items:center;gap:7px;"><span class="pill holiday">'+ico('flag',10)+' '+DAYS[hh.day]+' — '+hh.name+'</span><button class="rm-btn" onclick="removeHoliday('+o+','+hh.day+')">'+ico('x',14)+'</button></div>';}).join('')+'</div></div></div>';
 
-  // Vacation log
-  var vacHtml='<div style="margin-top:14px;"><div class="section-title">'+ico('beach',14)+' Vacation log</div><div class="hol-form"><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;"><select id="vac-member" style="font-size:12px;padding:5px 8px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);">'+MEMBERS.map(function(m){return'<option value="'+m.id+'">'+m.first+'</option>';}).join('')+'</select><label style="font-size:11px;color:var(--color-text-secondary);">From</label><input type="date" id="vac-start" onchange="vacStartChanged()" style="font-size:12px;padding:4px 6px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);" /><label style="font-size:11px;color:var(--color-text-tertiary);">To <span style="font-size:10px;">(optional)</span></label><input type="date" id="vac-end" style="font-size:12px;padding:4px 6px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);" /><input id="vac-note" placeholder="Note (optional)" style="flex:1;min-width:100px;font-size:12px;padding:5px 8px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);" /><button class="add-btn" onclick="addVacation()">'+ico('plus',12)+' Add</button></div>';
-  vacHtml+='<div style="font-size:11px;color:var(--color-text-tertiary);margin-top:4px;">Pick a date range and all weekdays will be marked as vacation. Remove to revert.</div>';
+  // Vacation / other-team log — a date-range shortcut so a whole week doesn't need clicking
+  // through the cell cycle day by day. Editing an existing entry reuses this same form (loaded
+  // with its current values) so the range can be adjusted — add/remove days or weeks — in place,
+  // instead of deleting and re-creating entries.
+  var editingVacEntry=editingVacationIdx!==null?vacationLog[editingVacationIdx]:null;
+  var vacHtml='<div style="margin-top:14px;"><div class="section-title">'+ico('beach',14)+' Vacation & other-team log</div><div class="hol-form">';
+  if(editingVacEntry)vacHtml+='<div style="font-size:11px;font-weight:500;color:#0C447C;margin-bottom:6px;">'+ico('edit',11)+' Editing this entry — change dates/member/note below, then Save.</div>';
+  vacHtml+='<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;"><select id="vac-member" style="font-size:12px;padding:5px 8px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);">'+MEMBERS.map(function(m){return'<option value="'+m.id+'"'+(editingVacEntry&&editingVacEntry.id===m.id?' selected':'')+'>'+m.first+'</option>';}).join('')+'</select><select id="vac-type" style="font-size:12px;padding:5px 8px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);"><option value="vacation"'+(editingVacEntry&&editingVacEntry.type==='vacation'?' selected':'')+'>Vacation</option><option value="otherteam"'+(editingVacEntry&&editingVacEntry.type==='otherteam'?' selected':'')+'>Other team</option></select><label style="font-size:11px;color:var(--color-text-secondary);">From</label><input type="date" id="vac-start" value="'+(editingVacEntry?editingVacEntry.start:'')+'" onchange="vacStartChanged()" style="font-size:12px;padding:4px 6px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);" /><label style="font-size:11px;color:var(--color-text-tertiary);">To <span style="font-size:10px;">(optional)</span></label><input type="date" id="vac-end" value="'+(editingVacEntry?editingVacEntry.end:'')+'" style="font-size:12px;padding:4px 6px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);" /><input id="vac-note" placeholder="Note (optional)" value="'+(editingVacEntry?(editingVacEntry.note||'').replace(/"/g,'&quot;'):'')+'" style="flex:1;min-width:100px;font-size:12px;padding:5px 8px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);" />';
+  if(editingVacEntry){
+    vacHtml+='<button class="add-btn" onclick="saveVacationEdit()">'+ico('check',12)+' Save changes</button><button style="font-size:12px;padding:5px 10px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:none;cursor:pointer;color:var(--color-text-secondary);" onclick="cancelEditVacation()">Cancel</button>';
+  }else{
+    vacHtml+='<button class="add-btn" onclick="addVacation()">'+ico('plus',12)+' Add</button>';
+  }
+  vacHtml+='</div>';
+  vacHtml+='<div style="font-size:11px;color:var(--color-text-tertiary);margin-top:4px;">Pick a date range — all weekdays get marked as Vacation or Other team in one go. Edit an entry to add/remove days or weeks later; remove to revert to office.</div>';
   if(vacationLog.length>0){
     // Sort by start date
     var sorted=vacationLog.map(function(v,i){return{v:v,i:i};}).sort(function(a,b){return a.v.start<b.v.start?-1:a.v.start>b.v.start?1:0;});
@@ -929,7 +976,9 @@ function renderWeekGrid(o,dates,sched,hols,holDays,locked,act,split,wfhPD,fmt){
       var v=item.v,idx=item.i;
       var m=MEMBERS.find(function(mm){return mm.id===v.id;});
       var isPast=v.end<dStr(new Date());
-      vacHtml+='<div style="display:flex;align-items:center;gap:7px;'+(isPast?'opacity:.5;':'')+'"><span class="pill vacation">'+ico('beach',10)+' '+vacLabel(v)+'</span><button class="rm-btn" onclick="removeVacation('+idx+')">'+ico('x',14)+'</button></div>';
+      var isOtherTeam=v.type==='otherteam';
+      var isBeingEdited=idx===editingVacationIdx;
+      vacHtml+='<div style="display:flex;align-items:center;gap:7px;'+(isBeingEdited?'':isPast?'opacity:.5;':'')+(isBeingEdited?'background:var(--color-background-secondary);border-radius:6px;padding:2px 4px;':'')+'"><span class="pill '+(isOtherTeam?'otherteam':'vacation')+'">'+ico(isOtherTeam?'pin':'beach',10)+' '+vacLabel(v)+'</span><button class="rm-btn" title="Edit" onclick="startEditVacation('+idx+')">'+ico('edit',13)+'</button><button class="rm-btn" title="Remove" onclick="removeVacation('+idx+')">'+ico('x',14)+'</button></div>';
     });
     vacHtml+='</div>';
   }

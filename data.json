@@ -41,7 +41,7 @@
       "initials": "MC",
       "av": "#FED7AA",
       "ac": "#EA580C",
-      "shift": "11",
+      "shift": "10",
       "hideable": true
     },
     {
@@ -90,7 +90,7 @@
       "initials": "AB",
       "av": "#BEF264",
       "ac": "#3F6212",
-      "shift": "11",
+      "shift": "10",
       "hideable": true
     }
   ],
@@ -145,7 +145,7 @@
         "off",
         "off",
         "off",
-        "off"
+        "wfh"
       ],
       "mafe": [
         "off",
@@ -155,7 +155,7 @@
         "vacation"
       ],
       "carlos": [
-        "off",
+        "wfh",
         "off",
         "wfh",
         "off",
@@ -165,7 +165,7 @@
         "off",
         "off",
         "wfh",
-        "off",
+        "wfh",
         "off"
       ],
       "ricardo": [
@@ -180,7 +180,7 @@
         "vacation",
         "wfh",
         "off",
-        "off"
+        "wfh"
       ],
       "perla": [
         "off",
@@ -190,11 +190,11 @@
         "off"
       ],
       "ricardo_int": [
+        "otherteam",
+        "otherteam",
         "off",
-        "off",
-        "off",
-        "off",
-        "off"
+        "otherteam",
+        "otherteam"
       ]
     },
     "2026-09-07": {
@@ -228,10 +228,10 @@
       ],
       "ricardo": [
         "off",
-        "off",
-        "off",
-        "off",
-        "off"
+        "otherteam",
+        "otherteam",
+        "otherteam",
+        "otherteam"
       ],
       "alan": [
         "off",
@@ -1059,45 +1059,38 @@
     },
     "2026-09-21": {
       "karen": [
+        "wfh",
+        "wfh",
+        "wfh",
         "off",
-        "off",
-        "off",
-        "off",
-        "off"
+        "wfh"
       ],
       "mafe": [
         "off",
-        "off",
-        "off",
+        "wfh",
+        "wfh",
         "off",
         "off"
       ],
       "carlos": [
         "off",
+        "wfh",
         "off",
-        "off",
-        "off",
+        "wfh",
         "off"
       ],
       "miriam": [
         "off",
+        "wfh",
         "off",
         "off",
-        "off",
-        "off"
+        "wfh"
       ],
       "ricardo": [
         "off",
         "off",
-        "off",
-        "off",
-        "off"
-      ],
-      "alan": [
-        "off",
-        "off",
-        "off",
-        "off",
+        "wfh",
+        "wfh",
         "off"
       ],
       "perla": [
@@ -1112,6 +1105,13 @@
         "off",
         "off",
         "off",
+        "off"
+      ],
+      "alan": [
+        "wfh",
+        "wfh",
+        "off",
+        "wfh",
         "off"
       ]
     },
@@ -1821,20 +1821,24 @@
       "ricardo_int": "10"
     },
     "2026-09-14": {
-      "karen": "10",
+      "karen": "8",
       "mafe": "10",
-      "carlos": "10",
-      "miriam": "11",
+      "carlos": "8",
+      "miriam": "10",
       "ricardo": "10",
-      "alan": "11"
+      "alan": "10",
+      "perla": "10",
+      "ricardo_int": "10"
     },
     "2026-09-21": {
-      "karen": "10",
-      "mafe": "10",
+      "karen": "11",
+      "mafe": "11",
       "carlos": "10",
-      "miriam": "11",
+      "miriam": "10",
       "ricardo": "10",
-      "alan": "11"
+      "perla": "10",
+      "ricardo_int": "10",
+      "alan": "10"
     },
     "2026-09-28": {
       "karen": "10",
@@ -1842,7 +1846,9 @@
       "carlos": "10",
       "miriam": "11",
       "ricardo": "10",
-      "alan": "11"
+      "alan": "11",
+      "perla": "10",
+      "ricardo_int": "10"
     },
     "2026-10-05": {
       "karen": "10",
@@ -2277,7 +2283,7 @@
         null
       ],
       "mafe": [
-        null,
+        "10",
         null,
         null,
         null,
@@ -2352,8 +2358,8 @@
         null,
         null,
         null,
-        null,
-        null
+        "10",
+        "9"
       ],
       "ricardo": [
         null,
@@ -2363,6 +2369,20 @@
         null
       ],
       "alan": [
+        null,
+        null,
+        null,
+        null,
+        "8"
+      ],
+      "perla": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "ricardo_int": [
         null,
         null,
         null,
@@ -2400,6 +2420,20 @@
         null
       ],
       "ricardo": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "perla": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "ricardo_int": [
         null,
         null,
         null,
@@ -2451,6 +2485,20 @@
         null
       ],
       "alan": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "perla": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "ricardo_int": [
         null,
         null,
         null,
@@ -2936,16 +2984,36 @@
       "note": ""
     }
   ],
-  "hiddenMembers": [
-    "perla",
-    "ricardo_int",
-    "ricardo"
-  ],
+  "hiddenByWeek": {
+    "2026-08-24": [
+      "perla",
+      "ricardo_int",
+      "ricardo"
+    ],
+    "2026-09-07": [
+      "ricardo_int",
+      "perla",
+      "ricardo"
+    ],
+    "2026-09-14": [
+      "ricardo_int",
+      "perla",
+      "ricardo"
+    ],
+    "2026-08-31": [
+      "perla",
+      "ricardo_int"
+    ]
+  },
   "shiftTZ": "mx",
-  "publishedAt": "2026-08-31T01:40:31.731Z",
+  "publishedAt": "2026-08-31T03:15:22.139Z",
   "publishLog": [
     {
       "at": "2026-08-31T01:40:31.731Z",
+      "note": ""
+    },
+    {
+      "at": "2026-08-31T03:15:22.139Z",
       "note": ""
     }
   ]

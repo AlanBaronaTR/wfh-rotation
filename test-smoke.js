@@ -793,6 +793,192 @@ function makeSandbox() {
 })();
 
 // ===========================================================================
+// 10. Alert noise reduction: the WFH-rebalance alert must only fire on a
+//     genuine majority (not any 3+), and the late-shift alert must only fire
+//     when someone is actually assigned to that shift band this week at all.
+// ===========================================================================
+(function alertThresholdChecks() {
+  // ---- WFH majority threshold ----
+  const g = makeSandbox();
+  const o = 15;
+  const wk = g.wkKey(o);
+  g.schedule[wk] = {};
+  g.MEMBERS.forEach((m) => { g.schedule[wk][m.id] = Array(5).fill('off'); });
+  // Default active team from DEFAULT_MEMBERS is 8 people; put exactly 3 on wfh Monday (not a
+  // holiday week) — this must NOT trigger the alert per the explicit "3 doesn't need rebalancing" feedback.
+  const activeIds = g.activeMembers(o).map((m) => m.id);
+  check('sanity: default active team has more than 6 people for this threshold test', activeIds.length > 6);
+  for (let i = 0; i < 3; i++) g.schedule[wk][activeIds[i]][0] = 'wfh';
+  g.wkOffset = o;
+  g.holidays[wk] = [];
+  try { g.render(); } catch (e) { check('render() with 3 WFH does not throw', false, e.stack); }
+  let combined = capturedHTML.join('\n');
+  check('3 people WFH does NOT trigger the "consider rebalancing" alert', combined.indexOf('consider rebalancing') === -1);
+
+  // Now push it to a genuine majority.
+  const g2 = makeSandbox();
+  const o2 = 16;
+  const wk2 = g2.wkKey(o2);
+  g2.schedule[wk2] = {};
+  g2.MEMBERS.forEach((m) => { g2.schedule[wk2][m.id] = Array(5).fill('off'); });
+  const activeIds2 = g2.activeMembers(o2).map((m) => m.id);
+  const majority = Math.floor(activeIds2.length / 2) + 1;
+  for (let i = 0; i < majority; i++) g2.schedule[wk2][activeIds2[i]][0] = 'wfh';
+  g2.wkOffset = o2;
+  try { g2.render(); } catch (e) { check('render() with a WFH majority does not throw', false, e.stack); }
+  combined = capturedHTML.join('\n');
+  check('a genuine majority WFH DOES trigger the "consider rebalancing" alert', combined.indexOf('consider rebalancing') !== -1);
+
+  // ---- Late-shift alert only when someone is actually on that shift this week ----
+  const g3 = makeSandbox();
+  const o3 = 17;
+  const wk3 = g3.wkKey(o3);
+  g3.schedule[wk3] = {};
+  g3.MEMBERS.forEach((m) => { g3.schedule[wk3][m.id] = Array(5).fill('off'); }); // everyone in office
+  g3.weekShift[wk3] = {};
+  g3.MEMBERS.forEach((m) => { g3.weekShift[wk3][m.id] = '10'; }); // nobody on the 11-7 late band
+  g3.shiftOv[wk3] = {};
+  g3.MEMBERS.forEach((m) => { g3.shiftOv[wk3][m.id] = [null, null, null, null, null]; });
+  g3.wkOffset = o3;
+  try { g3.render(); } catch (e) { check('render() with nobody on late shift does not throw', false, e.stack); }
+  combined = capturedHTML.join('\n');
+  check('no late-shift alert when literally nobody is assigned the 11-7 band this week',
+    combined.indexOf('no one on late shift') === -1);
+
+  // Sanity: if at least one person IS on the late band but not in office, the alert should still work.
+  const g4 = makeSandbox();
+  const o4 = 18;
+  const wk4 = g4.wkKey(o4);
+  g4.schedule[wk4] = {};
+  g4.MEMBERS.forEach((m) => { g4.schedule[wk4][m.id] = Array(5).fill('off'); });
+  g4.weekShift[wk4] = {};
+  g4.MEMBERS.forEach((m) => { g4.weekShift[wk4][m.id] = '10'; });
+  const lateId = g4.MEMBERS[0].id;
+  g4.weekShift[wk4][lateId] = '11';
+  g4.schedule[wk4][lateId][0] = 'wfh'; // the only late-shift person is WFH, not in office, on Monday
+  g4.wkOffset = o4;
+  try { g4.render(); } catch (e) { check('render() with an absent late-shift person does not throw', false, e.stack); }
+  combined = capturedHTML.join('\n');
+  check('late-shift alert still fires when someone IS assigned that band but is not in office that day',
+    combined.indexOf('no one on late shift') !== -1);
+})();
+
+// ===========================================================================
+// 11. Vacation/other-team log bulk assignment: adding an 'otherteam' entry
+//     must stamp every weekday in the range, not just one day at a time.
+// ===========================================================================
+(function otherTeamLogChecks() {
+  const g = makeSandbox();
+  const id = 'ricardo';
+  g.document.getElementById('vac-member').value = id;
+  g.document.getElementById('vac-start').value = '2026-09-07';
+  g.document.getElementById('vac-end').value = '2026-09-11';
+  g.document.getElementById('vac-note').value = 'with platform team';
+  g.document.getElementById('vac-type').value = 'otherteam';
+  try { g.addVacation(); } catch (e) { check('addVacation() with type=otherteam does not throw', false, e.stack); }
+  const entry = g.vacationLog[g.vacationLog.length - 1];
+  check("addVacation() records the entry with type 'otherteam'", !!entry && entry.type === 'otherteam');
+  const wk = '2026-09-07';
+  check('the whole week (Mon-Fri) got stamped otherteam in one shot, not just one day',
+    g.schedule[wk][id].every((v) => v === 'otherteam'));
+
+  // Removing it must revert every day back to office.
+  const idx = g.vacationLog.indexOf(entry);
+  g.confirm = () => true;
+  try { g.removeVacation(idx); } catch (e) { check('removeVacation() on an otherteam entry does not throw', false, e.stack); }
+  check('removing the otherteam log entry reverts the whole week to off', g.schedule[wk][id].every((v) => v === 'off'));
+
+  // A plain vacation entry must still default to type 'vacation' when the selector is left as-is.
+  const g2 = makeSandbox();
+  g2.document.getElementById('vac-member').value = 'karen';
+  g2.document.getElementById('vac-start').value = '2026-10-05';
+  g2.document.getElementById('vac-end').value = '2026-10-05';
+  g2.document.getElementById('vac-type').value = 'vacation';
+  g2.addVacation();
+  const vacEntry = g2.vacationLog[g2.vacationLog.length - 1];
+  check("a normal vacation entry keeps type 'vacation'", vacEntry.type === 'vacation');
+  check('vacation entries still stamp the vacation status, not otherteam', g2.schedule['2026-10-05'].karen[0] === 'vacation');
+})();
+
+// ===========================================================================
+// 12. Editing a vacation/other-team log entry in place (extend, shrink, or
+//     change member) instead of deleting and re-creating it.
+// ===========================================================================
+(function editVacationEntryChecks() {
+  const g = makeSandbox();
+  const id = 'ricardo';
+  g.document.getElementById('vac-member').value = id;
+  g.document.getElementById('vac-start').value = '2026-09-07';
+  g.document.getElementById('vac-end').value = '2026-09-11';
+  g.document.getElementById('vac-type').value = 'otherteam';
+  g.addVacation();
+  const idx = g.vacationLog.length - 1;
+
+  check('startEditVacation sets editingVacationIdx', (g.startEditVacation(idx), g.editingVacationIdx === idx));
+
+  // ---- Extend the range by a week (add days) ----
+  g.document.getElementById('vac-member').value = id;
+  g.document.getElementById('vac-start').value = '2026-09-07';
+  g.document.getElementById('vac-end').value = '2026-09-18'; // now two full weeks
+  g.document.getElementById('vac-type').value = 'otherteam';
+  try { g.saveVacationEdit(); } catch (e) { check('saveVacationEdit() does not throw (extend)', false, e.stack); }
+  check('saveVacationEdit() extends the range — original week still otherteam',
+    g.schedule['2026-09-07'][id].every((v) => v === 'otherteam'));
+  check('saveVacationEdit() extends the range — the new week is now otherteam too',
+    g.schedule['2026-09-14'][id].every((v) => v === 'otherteam'));
+  check('editingVacationIdx is cleared after saving', g.editingVacationIdx === null);
+  check('editing did not create a second log entry — the original entry was updated in place',
+    g.vacationLog.length === 1 && g.vacationLog[0].end === '2026-09-18');
+
+  // ---- Shrink the range (remove the second week again) ----
+  g.startEditVacation(idx);
+  g.document.getElementById('vac-member').value = id;
+  g.document.getElementById('vac-start').value = '2026-09-07';
+  g.document.getElementById('vac-end').value = '2026-09-11';
+  g.document.getElementById('vac-type').value = 'otherteam';
+  g.saveVacationEdit();
+  check('shrinking the range reverts the dropped week to off',
+    g.schedule['2026-09-14'][id].every((v) => v === 'off'));
+  check('shrinking the range keeps the remaining week intact',
+    g.schedule['2026-09-07'][id].every((v) => v === 'otherteam'));
+
+  // ---- Changing the member mid-edit reverts the OLD member's days and stamps the new one ----
+  g.startEditVacation(idx);
+  g.document.getElementById('vac-member').value = 'karen';
+  g.document.getElementById('vac-start').value = '2026-09-07';
+  g.document.getElementById('vac-end').value = '2026-09-11';
+  g.document.getElementById('vac-type').value = 'otherteam';
+  g.saveVacationEdit();
+  check("changing the member during edit reverts the OLD member's days", g.schedule['2026-09-07'][id].every((v) => v === 'off'));
+  check('changing the member during edit stamps the NEW member', g.schedule['2026-09-07'].karen.every((v) => v === 'otherteam'));
+
+  // ---- Cancel must leave everything untouched ----
+  g.startEditVacation(0);
+  check('cancelEditVacation clears editingVacationIdx', (g.cancelEditVacation(), g.editingVacationIdx === null));
+  check('cancel does not modify the entry', g.vacationLog[0].id === 'karen');
+
+  // ---- Removing an entry that is mid-edit clears the editing index ----
+  g.startEditVacation(0);
+  g.confirm = () => true;
+  g.removeVacation(0);
+  check('removing the entry being edited clears editingVacationIdx', g.editingVacationIdx === null);
+
+  // ---- Removing an earlier entry decrements a later editingVacationIdx instead of going stale ----
+  const g2 = makeSandbox();
+  g2.document.getElementById('vac-member').value = 'karen';
+  g2.document.getElementById('vac-start').value = '2026-09-07';
+  g2.addVacation();
+  g2.document.getElementById('vac-member').value = 'mafe';
+  g2.document.getElementById('vac-start').value = '2026-09-08';
+  g2.addVacation();
+  g2.startEditVacation(1); // editing mafe's entry
+  g2.confirm = () => true;
+  g2.removeVacation(0); // remove karen's entry (index 0), shifting mafe's entry to index 0
+  check('editingVacationIdx shifts down when an earlier entry is removed', g2.editingVacationIdx === 0);
+  check('the entry still being edited is still mafe\'s', g2.vacationLog[g2.editingVacationIdx].id === 'mafe');
+})();
+
+// ===========================================================================
 // Summary
 // ===========================================================================
 console.log('\n' + passes + ' passed, ' + failures + ' failed.');
