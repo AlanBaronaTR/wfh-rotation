@@ -430,6 +430,134 @@ function makeSandbox() {
 })();
 
 // ===========================================================================
+// 5. Team roster management: adding a member, soft-departing one (history
+//    preserved, future weeks excluded from mandate/desk counts), the hard-
+//    delete gate, and members surviving exportState()/applyState()/Publish.
+// ===========================================================================
+(function teamRosterManagementChecks() {
+  const g = makeSandbox();
+
+  // ---- Adding a member ----
+  const beforeCount = g.MEMBERS.length;
+  g.document.getElementById('mem-name').value = 'Test Person';
+  g.document.getElementById('mem-display').value = '';
+  g.document.getElementById('mem-initials').value = '';
+  g.document.getElementById('mem-shift').value = '9';
+  g.document.getElementById('mem-join').value = '';
+  try { g.addMember(); } catch (e) { check('addMember() does not throw', false, e.stack); }
+  check('addMember() adds exactly one member', g.MEMBERS.length === beforeCount + 1);
+  const newMember = g.MEMBERS[g.MEMBERS.length - 1];
+  check('new member has the entered name', !!newMember && newMember.name === 'Test Person');
+  check('new member display/nick default to the first name when left blank', newMember.first === 'Test' && newMember.nick === 'Test');
+  check('new member gets auto-generated initials when left blank', newMember.initials === 'TP');
+  check('new member gets the selected shift', newMember.shift === '9');
+  check('new member gets a slugified id', newMember.id === 'test_person');
+  check("new member joinDate defaults to the current week's Monday (so it does not retroactively appear in old weeks, and avoids the weekend edge case where today's exact date could exclude them from the current week)",
+    newMember.joinDate === g.wkKey(0));
+  check('new member gets an avatar color from the fixed palette',
+    g.AVATAR_PALETTE.some((c) => c.av === newMember.av && c.ac === newMember.ac));
+
+  g.document.getElementById('mem-name').value = 'Test Person';
+  g.addMember();
+  const dupeMember = g.MEMBERS[g.MEMBERS.length - 1];
+  check('adding a duplicate name gets a distinct id', dupeMember.id !== newMember.id);
+
+  check('a brand-new member (joins today) is excluded from a week entirely before today',
+    g.memberInWeek(newMember.id, -10) === false);
+  check('a brand-new member IS included in the current week', g.memberInWeek(newMember.id, 0) === true);
+
+  // ---- Departing an existing member who has real history ----
+  const id = 'karen';
+  const weekBeforeLeaving = 5, weekOfLeaving = 20;
+  const wkBefore = g.wkKey(weekBeforeLeaving);
+  g.schedule[wkBefore] = g.schedule[wkBefore] || {};
+  g.MEMBERS.forEach((m) => { if (!g.schedule[wkBefore][m.id]) g.schedule[wkBefore][m.id] = Array(5).fill('off'); });
+  g.schedule[wkBefore][id] = ['wfh', 'off', 'off', 'wfh', 'off'];
+  const beforeSnapshot = g.schedule[wkBefore][id].slice();
+  const officeBefore = g.officeDaysInWeek(id, weekBeforeLeaving);
+  const availBefore = g.availableDaysInWeek(id, weekBeforeLeaving);
+  check('karen is active in the week before she leaves', g.memberInWeek(id, weekBeforeLeaving) === true);
+
+  const leaveDateStr = g.wkKey(weekOfLeaving);
+  g.prompt = () => leaveDateStr;
+  try { g.departMember(id); } catch (e) { check('departMember() does not throw', false, e.stack); }
+  const karen = g.MEMBERS.find((m) => m.id === id);
+  check('departMember() sets leaveDate to the entered date', karen.leaveDate === leaveDateStr);
+
+  // Past week must be completely untouched.
+  check("the departed member's PAST week schedule is byte-for-byte unchanged",
+    JSON.stringify(g.schedule[wkBefore][id]) === JSON.stringify(beforeSnapshot));
+  check('officeDaysInWeek for the week before leaving is unchanged', g.officeDaysInWeek(id, weekBeforeLeaving) === officeBefore);
+  check('availableDaysInWeek for the week before leaving is unchanged', g.availableDaysInWeek(id, weekBeforeLeaving) === availBefore);
+  check('memberInWeek is still true for the week before leaving', g.memberInWeek(id, weekBeforeLeaving) === true);
+
+  // The week they leave (and beyond) must exclude them from rendering AND mandate/desk math.
+  check('memberInWeek is false on/after the leave week', g.memberInWeek(id, weekOfLeaving) === false);
+  check('activeMembers excludes the departed member on/after the leave week',
+    g.activeMembers(weekOfLeaving).every((m) => m.id !== id));
+  check('allActiveMembers (desk counting) excludes the departed member on/after the leave week',
+    g.allActiveMembers(weekOfLeaving).every((m) => m.id !== id));
+  check('officeDaysInWeek is 0 for the departed member on/after the leave week', g.officeDaysInWeek(id, weekOfLeaving) === 0);
+  check('availableDaysInWeek is 0 for the departed member on/after the leave week', g.availableDaysInWeek(id, weekOfLeaving) === 0);
+
+  // ---- Undo departure ----
+  try { g.undoDepart(id); } catch (e) { check('undoDepart() does not throw', false, e.stack); }
+  check('undoDepart() clears leaveDate', !g.MEMBERS.find((m) => m.id === id).leaveDate);
+  check('after undoDepart, the member is active again in that future week', g.memberInWeek(id, weekOfLeaving) === true);
+
+  // ---- Hard-delete gate ----
+  check('memberHasHistory is true for karen (real schedule entries exist)', g.memberHasHistory('karen') === true);
+  check('memberHasHistory is false for the freshly-added test member', g.memberHasHistory(newMember.id) === false);
+
+  g._alerted = false;
+  g.alert = () => { g._alerted = true; };
+  g.removeMemberHard('karen');
+  check('removeMemberHard() refuses to remove a member with history (blocked + alerted)',
+    g.MEMBERS.some((m) => m.id === 'karen') && g._alerted === true);
+
+  // A real teammate who is already part of the PUBLISHED roster must never be hard-deletable,
+  // even if they happen to have zero schedule history yet (e.g. a brand-new hire who hasn't had
+  // a single WFH/vacation day recorded). Only a member added THIS session, never published, is
+  // eligible. This is exactly the gap found while manually verifying against real data: Perla/the
+  // intern (real, already-published members) had all-default schedules and would otherwise have
+  // looked hard-deletable by a memberHasHistory()-only check.
+  g.PUBLISHED_MEMBER_IDS = new Set(g.MEMBERS.map((m) => m.id)); // simulate "already published"
+  check('canHardDelete is false for a published member with zero history', g.canHardDelete(newMember.id) === false);
+  g._alerted = false;
+  g.removeMemberHard(newMember.id);
+  check('removeMemberHard() refuses a published-but-historyless member (blocked + alerted)',
+    g.MEMBERS.some((m) => m.id === newMember.id) && g._alerted === true);
+
+  // Now simulate the true "just added by mistake, never published" case for a fresh member.
+  g.document.getElementById('mem-name').value = 'Oops Mistake';
+  g.addMember();
+  const mistakeMember = g.MEMBERS[g.MEMBERS.length - 1];
+  check('canHardDelete is true for a never-published member with zero history', g.canHardDelete(mistakeMember.id) === true);
+  g.confirm = () => true;
+  const countBeforeHardDelete = g.MEMBERS.length;
+  g.removeMemberHard(mistakeMember.id);
+  check('removeMemberHard() removes a never-published member with zero history',
+    g.MEMBERS.length === countBeforeHardDelete - 1 && !g.MEMBERS.some((m) => m.id === mistakeMember.id));
+
+  // ---- exportState()/applyState() round-trip, including a departed member ----
+  const g2 = makeSandbox();
+  g2.MEMBERS.find((m) => m.id === 'mafe').leaveDate = '2026-12-01';
+  const exported = JSON.parse(JSON.stringify(g2.exportState()));
+  const g3 = makeSandbox();
+  try { g3.applyState(exported); } catch (e) { check('applyState() round-trips members without throwing', false, e.stack); }
+  check('members (including leaveDate) round-trip through exportState/applyState',
+    g3.MEMBERS.some((m) => m.id === 'mafe' && m.leaveDate === '2026-12-01'));
+
+  // ---- dataFingerprint reacts to roster changes (so Publish/unpublished-changes notices it) ----
+  const g4 = makeSandbox();
+  const fp1 = g4.dataFingerprint();
+  g4.document.getElementById('mem-name').value = 'Fingerprint Test';
+  g4.addMember();
+  const fp2 = g4.dataFingerprint();
+  check('adding a member changes the data fingerprint (registers as an unpublished change)', fp1 !== fp2);
+})();
+
+// ===========================================================================
 // Summary
 // ===========================================================================
 console.log('\n' + passes + ' passed, ' + failures + ' failed.');

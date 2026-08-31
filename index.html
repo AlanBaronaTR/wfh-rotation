@@ -106,7 +106,10 @@ function shiftHrLabel(sh){var s=SHIFTS[sh];if(!s)return'?';if(shiftTZ==='mx')ret
 function shiftShortLabel(sh){var s=SHIFTS[sh];if(!s)return'?';if(shiftTZ==='mx')return s.label;if(shiftTZ==='ist')return s.ist;if(shiftTZ==='et'){var parts=s.et.split(' – ');return parts[0].replace(' am','').replace(' pm','p')+'–'+parts[1].replace(' am','').replace(' pm','p');}return s.label;}
 function migrateShift(v){return v==='early'?'10':v==='late'?'11':v;}
 function shiftStyle(sh,type){var s=SHIFTS[sh];if(!s)s=SHIFTS['10'];if(type==='badge')return'background:'+s.bg+';border:0.5px solid '+s.bd+';color:'+s.tx+';';if(type==='chip-out')return'background:#fff;border-color:'+s.bd+';color:'+s.bd+';';if(type==='chip-fill')return'background:'+s.bd+';border-color:'+s.bd+';color:#fff;';return'';}
-var MEMBERS=[
+// DEFAULT_MEMBERS is only the first-ever-load seed (no published data.json yet). At runtime the
+// team roster is mutable state in MEMBERS — added/departed members persist through
+// exportState()/applyState() and Publish, same as schedule/holidays/vacationLog.
+var DEFAULT_MEMBERS=[
   {id:'karen',name:'Karen Alfaro',first:'Karen',nick:'Karen',initials:'KA',av:'#93C5FD',ac:'#1E40AF',shift:'10',hideable:true},
   {id:'mafe',name:'Mafer Brea',first:'Mafer',nick:'Mafer',initials:'MF',av:'#E9D5FF',ac:'#7C3AED',shift:'10',hideable:true},
   {id:'carlos',name:'Carlos Hernández',first:'Carlos',nick:'Carlos',initials:'CH',av:'#CBD5E1',ac:'#334155',shift:'10',hideable:true},
@@ -115,6 +118,13 @@ var MEMBERS=[
   {id:'perla',name:'Perla Velasco',first:'Perla',nick:'Perla',initials:'PV',av:'#FBCFE8',ac:'#DB2777',shift:'10',joinDate:'2026-08-21',hideable:true,alwaysOffice:true},
   {id:'ricardo_int',name:'Ricardo Gómez (intern)',first:'Ricardo (int.)',nick:'Ricardo(int)',initials:'RI',av:'#FECACA',ac:'#DC2626',shift:'10',joinDate:'2026-08-21',hideable:true,alwaysOffice:true},
   {id:'alan',name:'Alan Barona',first:'Alan',nick:'Alan',initials:'AB',av:'#BEF264',ac:'#3F6212',shift:'11',hideable:true}
+];
+var MEMBERS=DEFAULT_MEMBERS.map(function(m){return Object.assign({},m);});
+var AVATAR_PALETTE=[
+  {av:'#93C5FD',ac:'#1E40AF'},{av:'#E9D5FF',ac:'#7C3AED'},{av:'#CBD5E1',ac:'#334155'},
+  {av:'#FED7AA',ac:'#EA580C'},{av:'#FEF08A',ac:'#A16207'},{av:'#FBCFE8',ac:'#DB2777'},
+  {av:'#FECACA',ac:'#DC2626'},{av:'#BEF264',ac:'#3F6212'},{av:'#A5F3FC',ac:'#0E7490'},
+  {av:'#DDD6FE',ac:'#5B21B6'}
 ];
 var DAYS=['Mon','Tue','Wed','Thu','Fri'],CYCLE=['off','wfh','vacation','sick'],MANDATE=3;
 var view='week',wkOffset=0,monthOffset=0,suggestedOffset=null,showExport=false,showCopy=false,showTeams=false,copyMode='sheet',teamsDark=true;
@@ -126,8 +136,14 @@ function dStr(date){var y=date.getFullYear(),m=String(date.getMonth()+1).padStar
 function wkKey(o){return dStr(getMonday(o));}
 function wkDates(o){var mon=getMonday(o);return Array.from({length:5},function(_,i){var dt=new Date(mon);dt.setDate(mon.getDate()+i);return dt;});}
 function joinDateOf(id){var m=MEMBERS.find(function(x){return x.id===id;});return m&&m.joinDate?m.joinDate:null;}
-function isPreJoin(id,o,d){var jd=joinDateOf(id);if(!jd)return false;return dStr(wkDates(o)[d])<jd;}
-function memberInWeek(id,o){var jd=joinDateOf(id);if(!jd)return true;return dStr(wkDates(o)[4])>=jd;}
+function leaveDateOf(id){var m=MEMBERS.find(function(x){return x.id===id;});return m&&m.leaveDate?m.leaveDate:null;}
+function isPostLeave(id,o,d){var ld=leaveDateOf(id);if(!ld)return false;return dStr(wkDates(o)[d])>=ld;}
+// isPreJoin() is the single "exclude this day for this member" check used at every render/count
+// call site in the file. It now ALSO covers days on/after a departed member's leaveDate (mirror
+// image of joinDate), so every existing isPreJoin() call site automatically excludes a departed
+// member's post-departure days without needing to be individually touched.
+function isPreJoin(id,o,d){var jd=joinDateOf(id);if(jd&&dStr(wkDates(o)[d])<jd)return true;return isPostLeave(id,o,d);}
+function memberInWeek(id,o){var jd=joinDateOf(id);if(jd&&dStr(wkDates(o)[4])<jd)return false;var ld=leaveDateOf(id);if(ld&&dStr(wkDates(o)[0])>=ld)return false;return true;}
 function splitActive(o){return dStr(getMonday(o))>=SHIFT_SPLIT;}
 
 weekShift['2026-08-18']={karen:'10',mafe:'10',carlos:'10',miriam:'10',alan:'10',ricardo:'10'};
@@ -179,8 +195,8 @@ if(!schedule['2026-08-24'])schedule['2026-08-24']={
 // ===== PERSISTENCE (localStorage) =====
 var STORAGE_KEY='wfh_rotation_mx_desk';
 function saveState(){try{var state=exportState();localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(e){}}
-function exportState(){return{schedule:schedule,holidays:holidays,weekShift:weekShift,shiftOv:shiftOv,notes:notes,lockedWeeks:Array.from(lockedWeeks),vacationLog:vacationLog,hiddenMembers:Array.from(hiddenMembers),shiftTZ:shiftTZ,publishedAt:lastPublishedAt,publishLog:publishLog};}
-function applyState(state){if(!state)return;if(state.schedule)Object.assign(schedule,state.schedule);if(state.holidays)Object.assign(holidays,state.holidays);if(state.weekShift){Object.assign(weekShift,state.weekShift);Object.keys(weekShift).forEach(function(wk){Object.keys(weekShift[wk]).forEach(function(mid){weekShift[wk][mid]=migrateShift(weekShift[wk][mid]);});});}if(state.shiftOv){Object.assign(shiftOv,state.shiftOv);Object.keys(shiftOv).forEach(function(wk){Object.keys(shiftOv[wk]).forEach(function(mid){if(Array.isArray(shiftOv[wk][mid]))shiftOv[wk][mid]=shiftOv[wk][mid].map(function(v){return v?migrateShift(v):v;});});});}if(state.notes)Object.assign(notes,state.notes);if(state.lockedWeeks)state.lockedWeeks.forEach(function(k){lockedWeeks.add(k);});if(state.vacationLog)vacationLog=state.vacationLog;if(state.hiddenMembers)state.hiddenMembers.forEach(function(k){hiddenMembers.add(k);});if(state.shiftTZ)shiftTZ=state.shiftTZ;if(state.publishedAt)lastPublishedAt=state.publishedAt;if(state.publishLog)publishLog=state.publishLog;}
+function exportState(){return{members:MEMBERS,schedule:schedule,holidays:holidays,weekShift:weekShift,shiftOv:shiftOv,notes:notes,lockedWeeks:Array.from(lockedWeeks),vacationLog:vacationLog,hiddenMembers:Array.from(hiddenMembers),shiftTZ:shiftTZ,publishedAt:lastPublishedAt,publishLog:publishLog};}
+function applyState(state){if(!state)return;if(state.members&&state.members.length)MEMBERS=state.members;if(state.schedule)Object.assign(schedule,state.schedule);if(state.holidays)Object.assign(holidays,state.holidays);if(state.weekShift){Object.assign(weekShift,state.weekShift);Object.keys(weekShift).forEach(function(wk){Object.keys(weekShift[wk]).forEach(function(mid){weekShift[wk][mid]=migrateShift(weekShift[wk][mid]);});});}if(state.shiftOv){Object.assign(shiftOv,state.shiftOv);Object.keys(shiftOv).forEach(function(wk){Object.keys(shiftOv[wk]).forEach(function(mid){if(Array.isArray(shiftOv[wk][mid]))shiftOv[wk][mid]=shiftOv[wk][mid].map(function(v){return v?migrateShift(v):v;});});});}if(state.notes)Object.assign(notes,state.notes);if(state.lockedWeeks)state.lockedWeeks.forEach(function(k){lockedWeeks.add(k);});if(state.vacationLog)vacationLog=state.vacationLog;if(state.hiddenMembers)state.hiddenMembers.forEach(function(k){hiddenMembers.add(k);});if(state.shiftTZ)shiftTZ=state.shiftTZ;if(state.publishedAt)lastPublishedAt=state.publishedAt;if(state.publishLog)publishLog=state.publishLog;}
 // ===== UNPUBLISHED-CHANGES DETECTION =====
 // A content fingerprint of the real schedule data, deliberately excluding anything that gets
 // lazily auto-filled with defaults just by *viewing* a week (e.g. getSched()/getWeekShift()
@@ -190,7 +206,7 @@ function normalizedScheduleForFingerprint(){var out={};Object.keys(schedule).for
 function normalizedHolidaysForFingerprint(){var out={};Object.keys(holidays).forEach(function(wk){if(holidays[wk]&&holidays[wk].length)out[wk]=holidays[wk];});return out;}
 function normalizedWeekShiftForFingerprint(){var out={};Object.keys(weekShift).forEach(function(wk){var wentry=weekShift[wk],hasCustom=false;Object.keys(wentry).forEach(function(id){var mem=MEMBERS.find(function(mm){return mm.id===id;}),base=(mem&&mem.shift)||'10';if(migrateShift(wentry[id])!==base)hasCustom=true;});if(hasCustom)out[wk]=wentry;});return out;}
 function normalizedShiftOvForFingerprint(){var out={};Object.keys(shiftOv).forEach(function(wk){var wentry=shiftOv[wk],hasOv=false;Object.keys(wentry).forEach(function(id){(wentry[id]||[]).forEach(function(v){if(v)hasOv=true;});});if(hasOv)out[wk]=wentry;});return out;}
-function dataFingerprint(){return JSON.stringify({schedule:normalizedScheduleForFingerprint(),holidays:normalizedHolidaysForFingerprint(),weekShift:normalizedWeekShiftForFingerprint(),shiftOv:normalizedShiftOvForFingerprint(),notes:notes,lockedWeeks:Array.from(lockedWeeks).sort(),vacationLog:vacationLog,hiddenMembers:Array.from(hiddenMembers).sort(),shiftTZ:shiftTZ});}
+function dataFingerprint(){return JSON.stringify({members:MEMBERS,schedule:normalizedScheduleForFingerprint(),holidays:normalizedHolidaysForFingerprint(),weekShift:normalizedWeekShiftForFingerprint(),shiftOv:normalizedShiftOvForFingerprint(),notes:notes,lockedWeeks:Array.from(lockedWeeks).sort(),vacationLog:vacationLog,hiddenMembers:Array.from(hiddenMembers).sort(),shiftTZ:shiftTZ});}
 function hasUnpublishedChanges(){return UNPUBLISHED_BASELINE!==null&&dataFingerprint()!==UNPUBLISHED_BASELINE;}
 function loadState(){try{var raw=localStorage.getItem(STORAGE_KEY);if(!raw)return;applyState(JSON.parse(raw));}catch(e){}}
 function resetState(){if(confirm('Reset all data to defaults? This clears all your saved schedules, holidays, notes, and shifts.')){localStorage.removeItem(STORAGE_KEY);location.reload();}}
@@ -198,6 +214,11 @@ function resetState(){if(confirm('Reset all data to defaults? This clears all yo
 // EDIT_MODE=true: this copy is the editor -- local browser edits win, and "Publish" exports data.json to commit.
 // EDIT_MODE=false: view-only copy -- always shows what's published in data.json, ignores any local edits.
 var REMOTE_LOADED=false;
+// Snapshot of member ids that exist in the currently-published truth (set at boot, before local
+// edits, and refreshed on Publish). Used to gate hard-delete: only a member added THIS session
+// that has never been published yet is eligible — a real, already-published teammate should
+// never be hard-deletable just because they happen to have an all-default schedule so far.
+var PUBLISHED_MEMBER_IDS=new Set();
 function publishData(){
   var note=prompt('Optional: short note describing what changed in this publish (leave blank to skip):','');
   if(note===null)return;
@@ -210,6 +231,7 @@ function publishData(){
   var a=document.createElement('a');a.href=url;a.download='data.json';document.body.appendChild(a);a.click();document.body.removeChild(a);
   setTimeout(function(){URL.revokeObjectURL(url);},1000);
   UNPUBLISHED_BASELINE=dataFingerprint();
+  PUBLISHED_MEMBER_IDS=new Set(MEMBERS.map(function(m){return m.id;}));
   render();
 }
 function formatPublishedAt(iso){if(!iso)return'never published';try{return new Date(iso).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'});}catch(e){return iso;}}
@@ -227,6 +249,7 @@ function bootAndRender(){
   fetch('./data.json?_='+Date.now()).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}).then(function(remote){
     if(remote){REMOTE_LOADED=true;applyState(remote);}
     UNPUBLISHED_BASELINE=dataFingerprint();
+    PUBLISHED_MEMBER_IDS=new Set(MEMBERS.map(function(m){return m.id;}));
     loadState();
     render();
   });
@@ -363,6 +386,66 @@ function removeVacation(idx){
   render();
 }
 function doDownload(){}
+// ===== TEAM ROSTER MANAGEMENT =====
+function slugify(name){return(name||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'')||'member';}
+function uniqueMemberId(base){var id=base,n=2;while(MEMBERS.some(function(m){return m.id===id;})){id=base+'_'+n;n++;}return id;}
+function pickAvatarColor(){return AVATAR_PALETTE[MEMBERS.length%AVATAR_PALETTE.length];}
+// Whether this member has any recorded schedule/vacation/note history — the gate for allowing a
+// hard delete. If true, only "Mark as departed" (leaveDate) is allowed, so past weeks are never lost.
+function memberHasHistory(id){
+  var hasSchedule=Object.keys(schedule).some(function(wk){var arr=schedule[wk][id];return arr&&arr.some(function(v){return v&&v!=='off';});});
+  if(hasSchedule)return true;
+  if(vacationLog.some(function(v){return v.id===id;}))return true;
+  var noteRe=new RegExp('_'+id.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'_\\d$');
+  if(Object.keys(notes).some(function(k){return noteRe.test(k);}))return true;
+  return false;
+}
+function addMember(){
+  var name=(document.getElementById('mem-name').value||'').trim();
+  if(!name){alert('Name is required.');return;}
+  var display=(document.getElementById('mem-display').value||'').trim()||name.split(' ')[0];
+  var initialsInput=(document.getElementById('mem-initials').value||'').trim();
+  var parts=name.split(' ').filter(Boolean);
+  var autoInitials=((parts[0]||'')[0]||'')+((parts[1]||'')[0]||'');
+  var initials=(initialsInput||autoInitials||display.slice(0,2)).toUpperCase().slice(0,3);
+  var shift=document.getElementById('mem-shift').value||'10';
+  // New members default to joining as of the CURRENT week's Monday (not "always been here"), so
+  // they don't retroactively appear — and count toward the mandate — in weeks that already
+  // existed before they were added. Using the week's Monday rather than today's exact date avoids
+  // a weekend edge case: memberInWeek() checks the week's Friday against joinDate, so defaulting
+  // to today would wrongly exclude someone added on a Saturday/Sunday from the current week too.
+  var joinInput=(document.getElementById('mem-join').value||'').trim();
+  var joinDate=joinInput||wkKey(0);
+  var color=pickAvatarColor();
+  var id=uniqueMemberId(slugify(name));
+  var member={id:id,name:name,first:display,nick:display,initials:initials,av:color.av,ac:color.ac,shift:shift,joinDate:joinDate,hideable:true};
+  MEMBERS.push(member);
+  ['mem-name','mem-display','mem-initials','mem-join'].forEach(function(elId){var el=document.getElementById(elId);if(el)el.value='';});
+  render();
+}
+function departMember(id){
+  var m=MEMBERS.find(function(mm){return mm.id===id;});
+  if(!m)return;
+  var def=m.leaveDate||dStr(new Date());
+  var ld=prompt(m.first+' — leave date (YYYY-MM-DD). They stop appearing (and stop counting toward the mandate/desk limit) in weeks on or after this date; everything before it is unchanged:',def);
+  if(ld===null)return;
+  ld=ld.trim();
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(ld)){alert('Please enter a date as YYYY-MM-DD.');return;}
+  m.leaveDate=ld;
+  render();
+}
+function undoDepart(id){var m=MEMBERS.find(function(mm){return mm.id===id;});if(!m)return;delete m.leaveDate;render();}
+function canHardDelete(id){return!PUBLISHED_MEMBER_IDS.has(id)&&!memberHasHistory(id);}
+function removeMemberHard(id){
+  if(PUBLISHED_MEMBER_IDS.has(id)){alert('This member is already part of the published roster — use "Mark as departed" instead, so past weeks stay intact.');return;}
+  if(memberHasHistory(id)){alert('This member already has schedule/vacation/note history — use "Mark as departed" instead, so past weeks stay intact.');return;}
+  var m=MEMBERS.find(function(mm){return mm.id===id;});
+  if(!m)return;
+  if(!confirm('Remove '+m.first+' entirely? They were never published and have no schedule history yet, so nothing is lost — but this cannot be undone.'))return;
+  MEMBERS=MEMBERS.filter(function(mm){return mm.id!==id;});
+  hiddenMembers.delete(id);
+  render();
+}
 function vacLabel(entry){
   var m=MEMBERS.find(function(mm){return mm.id===entry.id;});
   var fmt=function(ds){var p=ds.split('-');return parseInt(p[2])+'/'+parseInt(p[1]);};
@@ -586,6 +669,39 @@ function changelogHTML(){
   }).join('');
   return '<details style="margin-top:14px;"><summary style="cursor:pointer;font-size:13px;font-weight:500;color:var(--color-text-primary);">'+ico('note',12)+' Recent changes ('+publishLog.length+')</summary><div style="margin-top:6px;">'+items+'</div></details>';
 }
+function manageTeamHTML(){
+  var h='<div style="margin-top:14px;"><div class="section-title">'+ico('userplus',14)+' Manage team</div><div class="hol-form">';
+  h+='<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">';
+  h+='<input id="mem-name" placeholder="Full name" style="flex:1;min-width:120px;font-size:12px;padding:5px 8px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);" />';
+  h+='<input id="mem-display" placeholder="Display name (optional)" style="flex:1;min-width:110px;font-size:12px;padding:5px 8px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);" />';
+  h+='<input id="mem-initials" placeholder="Initials" maxlength="3" style="width:70px;font-size:12px;padding:5px 8px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);" />';
+  h+='<select id="mem-shift" style="font-size:12px;padding:5px 8px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);">'+SHIFT_ORDER.map(function(s){return '<option value="'+s+'"'+(s==='10'?' selected':'')+'>'+SHIFTS[s].label+'</option>';}).join('')+'</select>';
+  h+='<label style="font-size:11px;color:var(--color-text-tertiary);">Join date <span style="font-size:10px;">(optional — defaults to today)</span></label>';
+  h+='<input type="date" id="mem-join" style="font-size:12px;padding:4px 6px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);" />';
+  h+='<button class="add-btn" onclick="addMember()">'+ico('userplus',12)+' Add</button>';
+  h+='</div>';
+  h+='<div style="margin-top:8px;display:flex;flex-direction:column;gap:4px;">';
+  MEMBERS.forEach(function(m){
+    var departed=!!m.leaveDate;
+    h+='<div style="display:flex;align-items:center;gap:7px;'+(departed?'opacity:.6;':'')+'">';
+    h+='<div class="avatar" style="width:22px;height:22px;font-size:9px;background:'+m.av+';color:'+m.ac+';">'+m.initials+'</div>';
+    h+='<span style="font-size:12px;flex:1;">'+m.first;
+    if(m.joinDate)h+=' <span style="color:var(--color-text-tertiary);font-size:10px;">(joined '+m.joinDate+')</span>';
+    if(departed)h+=' <span style="color:#B45309;font-size:10px;">(departed '+m.leaveDate+')</span>';
+    h+='</span>';
+    if(departed){
+      h+='<button style="font-size:10px;padding:2px 8px;border-radius:12px;border:0.5px solid var(--color-border-secondary);background:none;cursor:pointer;color:var(--color-text-secondary);" onclick="undoDepart(\''+m.id+'\')">Undo departure</button>';
+    }else{
+      h+='<button style="font-size:10px;padding:2px 8px;border-radius:12px;border:0.5px solid var(--color-border-secondary);background:none;cursor:pointer;color:var(--color-text-secondary);" onclick="departMember(\''+m.id+'\')">Mark as departed</button>';
+      if(canHardDelete(m.id)){
+        h+='<button class="rm-btn" title="Remove (never published, no schedule history yet)" onclick="removeMemberHard(\''+m.id+'\')">'+ico('x',14)+'</button>';
+      }
+    }
+    h+='</div>';
+  });
+  h+='</div></div></div>';
+  return h;
+}
 function makeShiftChip(o,id,d,locked){var eff=effShift(o,id,d),ov=isOverridden(o,id,d);var chip=document.createElement('div');chip.className='shift-chip';chip.style.cssText=shiftStyle(eff,ov?'chip-fill':'chip-out');chip.textContent=shiftHrLabel(eff);chip.title=shiftTimeLabel(eff)+(ov?' (override)':' (week default)');if(!locked){chip.addEventListener('click',function(e){e.stopPropagation();cycleShift(id,d,o);});}else chip.style.cursor='default';return chip;}
 
 function render(){
@@ -643,7 +759,7 @@ function render(){
   h+='<div id="week-grid-wrap"></div><div id="compliance-section"></div>';
   // Legend
   h+='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center;"><span class="pill wfh">'+ico('home',11)+' WFH</span><span class="pill shared">'+ico('home',11)+' Shared WFH</span><span class="pill holiday">'+ico('flag',11)+' Holiday</span><span class="pill vacation">'+ico('beach',11)+' Vacation</span><span class="pill sick">'+ico('heartoff',11)+' Sick</span><span class="pill off">'+ico('briefcase',11)+' Office</span>'+(split?'<span class="shift-badge early">10–6 early</span><span class="shift-badge late">11–7 late</span><span style="margin-left:auto;font-size:11px;color:var(--color-text-secondary);">tap badge = whole week · filled chip = day override</span>':'<span class="shift-badge early">10–6</span><span style="margin-left:auto;font-size:11px;color:var(--color-text-secondary);">11–7 split starts Jul 20</span>')+'</div>';
-  h+='<div id="editor-section"></div><div id="holiday-section"></div><div id="vacation-section"></div><div id="copy-section"></div><div id="teams-section"></div><div id="export-section"></div>';
+  h+='<div id="editor-section"></div><div id="holiday-section"></div><div id="vacation-section"></div><div id="manage-team-section"></div><div id="copy-section"></div><div id="teams-section"></div><div id="export-section"></div>';
   h+=changelogHTML();
   h+='<div style="margin-top:20px;padding-top:12px;border-top:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:space-between;"><span style="font-size:10px;color:var(--color-text-tertiary);">Changes auto-saved to this browser.</span><button onclick="resetState()" style="font-size:10px;color:var(--color-text-tertiary);background:none;border:none;cursor:pointer;text-decoration:underline;opacity:.6;">Reset to defaults</button></div>';
 
@@ -681,7 +797,7 @@ function renderWeekGrid(o,dates,sched,hols,holDays,locked,act,split,wfhPD,fmt){
     var cells=document.createElement('div');cells.className='dcells';var cellEls=[];
     for(var d=0;d<5;d++){(function(d){
       var cell=document.createElement('div');var isHol=holDays.includes(d);var pre=isPreJoin(m.id,o,d);var raw=sched[m.id][d];
-      if(pre){cell.className='cell prejoin';cell.innerHTML='<div style="font-size:13px;">–</div>';cell.title='Not on the team yet';cells.appendChild(cell);cellEls.push(cell);return;}
+      if(pre){cell.className='cell prejoin';cell.innerHTML='<div style="font-size:13px;">–</div>';cell.title=isPostLeave(m.id,o,d)?'No longer on the team':'Not on the team yet';cells.appendChild(cell);cellEls.push(cell);return;}
       var st=(isHol&&raw==='off')?'holiday':raw;if(st==='wfh'&&wfhPD[d]>1)st='shared';
       var cellLocked=locked&&!isHol;
       cell.className='cell '+st+(cellLocked?' locked':'');
@@ -774,6 +890,7 @@ function renderWeekGrid(o,dates,sched,hols,holDays,locked,act,split,wfhPD,fmt){
   }
   vacHtml+='</div></div>';
   document.getElementById('vacation-section').innerHTML=vacHtml;
+  document.getElementById('manage-team-section').innerHTML=manageTeamHTML();
 
   // Copy panel
   if(showCopy){var tsv=copyMode==='sheet'?buildSheetTSV(o):buildTSV(o,copyMode);var modeBtn=function(id,label){return'<button style="font-size:11px;padding:4px 11px;border-radius:20px;border:0.5px solid '+(copyMode===id?'#378ADD':'var(--color-border-secondary)')+';cursor:pointer;color:'+(copyMode===id?'#0C447C':'var(--color-text-secondary)')+';background:'+(copyMode===id?'#E6F1FB':'var(--color-background-secondary)')+';font-weight:'+(copyMode===id?'500':'400')+';" onclick="setCopyMode(\''+id+'\')">'+label+'</button>';};var helpText=copyMode==='sheet'?'Copies a <strong>rich table</strong> — paste into Excel and names are already colored: <span style="color:#00B050;font-weight:500;">green = WFO</span>, black = WFH. No find-and-replace needed.':copyMode==='ist'?'IST band labels with (O)/(H) tags.':'MX local times with (O)/(H) tags.';document.getElementById('copy-section').innerHTML='<div style="margin-top:16px;border:0.5px solid var(--color-border-secondary);border-radius:12px;padding:14px;background:var(--color-background-primary);"><div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;"><div style="font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px;">'+ico('tblexport',14)+' Copy for the shared tracker</div><div style="display:flex;gap:5px;">'+modeBtn('sheet','Sheet format')+modeBtn('local','MX time')+modeBtn('ist','IST bands')+'</div></div><div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:8px;">'+helpText+'</div><textarea id="copy-area" class="copy-area" readonly>'+tsv.replace(/</g,'&lt;')+'</textarea><div style="display:flex;justify-content:flex-end;margin-top:8px;"><button id="copy-btn" onclick="copyTSV()" style="background:#2563EB;border:1.5px solid #1D4ED8;color:#fff;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:5px;">'+ico('copy',12)+' Copy</button></div></div>';}
