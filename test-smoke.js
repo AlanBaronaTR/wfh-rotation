@@ -117,8 +117,9 @@ function makeSandbox() {
   const id = g.MEMBERS[0].id, d = 1;
 
   // Holiday cells cycle through the FULL status range (same as a normal day) so someone required
-  // to work can be set to office/wfh, and someone out that day can still be marked vacation/sick
-  // directly — not just via the separate vacation-log form.
+  // to work can be set to office/wfh, someone out that day can be marked vacation/sick directly
+  // (not just via the separate vacation-log form), and someone working with another team that day
+  // can be marked otherteam too.
   check('holiday cell starts at off (Holiday)', g.schedule[wk][id][d] === 'off');
   g.cycleCell(id, d, o);
   check('1st click cycles Holiday -> Office', g.schedule[wk][id][d] === 'office');
@@ -129,7 +130,9 @@ function makeSandbox() {
   g.cycleCell(id, d, o);
   check('4th click cycles Vacation -> Sick', g.schedule[wk][id][d] === 'sick');
   g.cycleCell(id, d, o);
-  check('5th click cycles Sick -> back to Holiday', g.schedule[wk][id][d] === 'off');
+  check('5th click cycles Sick -> Other team', g.schedule[wk][id][d] === 'otherteam');
+  g.cycleCell(id, d, o);
+  check('6th click cycles Other team -> back to Holiday', g.schedule[wk][id][d] === 'off');
 
   // officeDaysInWeek / officeDaysInMonth: office-on-holiday should count, wfh/off should not.
   g.schedule[wk][id][d] = 'off';
@@ -473,9 +476,9 @@ function makeSandbox() {
     g.memberInWeek(newMember.id, -10) === false);
   check('a brand-new member IS included in the current week', g.memberInWeek(newMember.id, 0) === true);
 
-  // ---- Departing an existing member who has real history ----
+  // ---- Removing an existing member who has real history (soft path: leaveDate = today) ----
   const id = 'karen';
-  const weekBeforeLeaving = 5, weekOfLeaving = 20;
+  const weekBeforeLeaving = -5, weekAfterLeaving = 10;
   const wkBefore = g.wkKey(weekBeforeLeaving);
   g.schedule[wkBefore] = g.schedule[wkBefore] || {};
   g.MEMBERS.forEach((m) => { if (!g.schedule[wkBefore][m.id]) g.schedule[wkBefore][m.id] = Array(5).fill('off'); });
@@ -483,44 +486,49 @@ function makeSandbox() {
   const beforeSnapshot = g.schedule[wkBefore][id].slice();
   const officeBefore = g.officeDaysInWeek(id, weekBeforeLeaving);
   const availBefore = g.availableDaysInWeek(id, weekBeforeLeaving);
-  check('karen is active in the week before she leaves', g.memberInWeek(id, weekBeforeLeaving) === true);
+  check('karen is active in a week well before she is removed', g.memberInWeek(id, weekBeforeLeaving) === true);
 
-  const leaveDateStr = g.wkKey(weekOfLeaving);
-  g.prompt = () => leaveDateStr;
-  try { g.departMember(id); } catch (e) { check('departMember() does not throw', false, e.stack); }
+  g.confirm = () => true;
+  try { g.removeMember(id); } catch (e) { check('removeMember() does not throw', false, e.stack); }
   const karen = g.MEMBERS.find((m) => m.id === id);
-  check('departMember() sets leaveDate to the entered date', karen.leaveDate === leaveDateStr);
+  check('removeMember() (soft path) sets leaveDate to today, with no date prompt needed', karen.leaveDate === g.dStr(new Date()));
 
   // Past week must be completely untouched.
-  check("the departed member's PAST week schedule is byte-for-byte unchanged",
+  check("the removed member's PAST week schedule is byte-for-byte unchanged",
     JSON.stringify(g.schedule[wkBefore][id]) === JSON.stringify(beforeSnapshot));
-  check('officeDaysInWeek for the week before leaving is unchanged', g.officeDaysInWeek(id, weekBeforeLeaving) === officeBefore);
-  check('availableDaysInWeek for the week before leaving is unchanged', g.availableDaysInWeek(id, weekBeforeLeaving) === availBefore);
-  check('memberInWeek is still true for the week before leaving', g.memberInWeek(id, weekBeforeLeaving) === true);
+  check('officeDaysInWeek for the week before removal is unchanged', g.officeDaysInWeek(id, weekBeforeLeaving) === officeBefore);
+  check('availableDaysInWeek for the week before removal is unchanged', g.availableDaysInWeek(id, weekBeforeLeaving) === availBefore);
+  check('memberInWeek is still true for the week before removal', g.memberInWeek(id, weekBeforeLeaving) === true);
 
-  // The week they leave (and beyond) must exclude them from rendering AND mandate/desk math.
-  check('memberInWeek is false on/after the leave week', g.memberInWeek(id, weekOfLeaving) === false);
-  check('activeMembers excludes the departed member on/after the leave week',
-    g.activeMembers(weekOfLeaving).every((m) => m.id !== id));
-  check('allActiveMembers (desk counting) excludes the departed member on/after the leave week',
-    g.allActiveMembers(weekOfLeaving).every((m) => m.id !== id));
-  check('officeDaysInWeek is 0 for the departed member on/after the leave week', g.officeDaysInWeek(id, weekOfLeaving) === 0);
-  check('availableDaysInWeek is 0 for the departed member on/after the leave week', g.availableDaysInWeek(id, weekOfLeaving) === 0);
+  // A week well after removal must exclude them from rendering AND mandate/desk math.
+  check('memberInWeek is false for a week well after removal', g.memberInWeek(id, weekAfterLeaving) === false);
+  check('activeMembers excludes the removed member for a week well after removal',
+    g.activeMembers(weekAfterLeaving).every((m) => m.id !== id));
+  check('allActiveMembers (desk counting) excludes the removed member for a week well after removal',
+    g.allActiveMembers(weekAfterLeaving).every((m) => m.id !== id));
+  check('officeDaysInWeek is 0 for the removed member for a week well after removal', g.officeDaysInWeek(id, weekAfterLeaving) === 0);
+  check('availableDaysInWeek is 0 for the removed member for a week well after removal', g.availableDaysInWeek(id, weekAfterLeaving) === 0);
 
-  // ---- Undo departure ----
-  try { g.undoDepart(id); } catch (e) { check('undoDepart() does not throw', false, e.stack); }
-  check('undoDepart() clears leaveDate', !g.MEMBERS.find((m) => m.id === id).leaveDate);
-  check('after undoDepart, the member is active again in that future week', g.memberInWeek(id, weekOfLeaving) === true);
+  // ---- Re-adding (e.g. returning from a secondment) ----
+  try { g.reAddMember(id); } catch (e) { check('reAddMember() does not throw', false, e.stack); }
+  const readded = g.MEMBERS.find((m) => m.id === id);
+  check('reAddMember() clears leaveDate', !readded.leaveDate);
+  check('reAddMember() sets a FRESH joinDate (today), not just clearing leaveDate', readded.joinDate === g.dStr(new Date()));
+  check('after reAddMember, the member is active again in that future week', g.memberInWeek(id, weekAfterLeaving) === true);
+  check('after reAddMember, the member is correctly still excluded from the well-before week (the secondment gap is preserved)',
+    g.memberInWeek(id, weekBeforeLeaving) === false);
 
-  // ---- Hard-delete gate ----
+  // ---- Hard-delete gate (still reachable, now via the single removeMember() entry point) ----
   check('memberHasHistory is true for karen (real schedule entries exist)', g.memberHasHistory('karen') === true);
   check('memberHasHistory is false for the freshly-added test member', g.memberHasHistory(newMember.id) === false);
 
   g._alerted = false;
   g.alert = () => { g._alerted = true; };
-  g.removeMemberHard('karen');
-  check('removeMemberHard() refuses to remove a member with history (blocked + alerted)',
-    g.MEMBERS.some((m) => m.id === 'karen') && g._alerted === true);
+  g.confirm = () => { g._confirmedSoft = true; return true; };
+  g._confirmedSoft = false;
+  g.removeMember('karen');
+  check('removeMember() takes the SOFT path for a member with history (leaveDate set, not removed from MEMBERS)',
+    g.MEMBERS.some((m) => m.id === 'karen') && g._confirmedSoft === true);
 
   // A real teammate who is already part of the PUBLISHED roster must never be hard-deletable,
   // even if they happen to have zero schedule history yet (e.g. a brand-new hire who hasn't had
@@ -530,20 +538,19 @@ function makeSandbox() {
   // looked hard-deletable by a memberHasHistory()-only check.
   g.PUBLISHED_MEMBER_IDS = new Set(g.MEMBERS.map((m) => m.id)); // simulate "already published"
   check('canHardDelete is false for a published member with zero history', g.canHardDelete(newMember.id) === false);
-  g._alerted = false;
-  g.removeMemberHard(newMember.id);
-  check('removeMemberHard() refuses a published-but-historyless member (blocked + alerted)',
-    g.MEMBERS.some((m) => m.id === newMember.id) && g._alerted === true);
+  g._confirmedSoft = false;
+  g.removeMember(newMember.id);
+  check('removeMember() takes the SOFT path (not hard delete) for a published-but-historyless member',
+    g.MEMBERS.some((m) => m.id === newMember.id) && g._confirmedSoft === true && g.MEMBERS.find((m) => m.id === newMember.id).leaveDate === g.dStr(new Date()));
 
   // Now simulate the true "just added by mistake, never published" case for a fresh member.
   g.document.getElementById('mem-name').value = 'Oops Mistake';
   g.addMember();
   const mistakeMember = g.MEMBERS[g.MEMBERS.length - 1];
   check('canHardDelete is true for a never-published member with zero history', g.canHardDelete(mistakeMember.id) === true);
-  g.confirm = () => true;
   const countBeforeHardDelete = g.MEMBERS.length;
-  g.removeMemberHard(mistakeMember.id);
-  check('removeMemberHard() removes a never-published member with zero history',
+  g.removeMember(mistakeMember.id);
+  check('removeMember() takes the HARD path for a never-published member with zero history',
     g.MEMBERS.length === countBeforeHardDelete - 1 && !g.MEMBERS.some((m) => m.id === mistakeMember.id));
 
   // ---- exportState()/applyState() round-trip, including a departed member ----
@@ -622,6 +629,113 @@ function makeSandbox() {
     !!sheetTsv && sheetTsv.split('\n').some((line) => line.startsWith('Leaves') && line.indexOf(g.MEMBERS.find((m) => m.id === id).nick) !== -1));
   check('buildTSV Leaves row mentions the holiday-day sick member',
     !!tsv && tsv.split('\n').some((line) => line.startsWith('Leaves') && line.indexOf(memberFirst) !== -1));
+})();
+
+// ===========================================================================
+// 7. 'otherteam' status: working, but with a different team that day — must
+//    count toward the person's own office-day mandate, but must NEVER count
+//    toward this team's desk limit, and must render/export distinctly from
+//    both 'office' and 'wfh'.
+// ===========================================================================
+(function otherTeamStatusChecks() {
+  const g = makeSandbox();
+  const id = g.MEMBERS[0].id;
+
+  check("isWorking('otherteam') is working", g.isWorking('otherteam') === true);
+
+  // Isolate day 0 the same way earlier sections do — other days set to 'wfh' so they don't
+  // contaminate the office-credit assertions.
+  const o = 40;
+  const wk = g.wkKey(o);
+  g.schedule[wk] = {};
+  g.MEMBERS.forEach((m) => { g.schedule[wk][m.id] = ['otherteam', 'wfh', 'wfh', 'wfh', 'wfh']; });
+
+  check('otherteam credits officeDaysInWeek (counts toward the personal mandate)', g.officeDaysInWeek(id, o) === 1);
+  check('otherteam counts as available', g.availableDaysInWeek(id, o) === 5);
+
+  // The desk-limit check (mirrored from render()'s inline logic) must NOT count otherteam as
+  // occupying one of this team's seats, even though the day isn't a holiday.
+  const officeVal = 'off'; // non-holiday day -> desk occupancy is judged by literal 'off'
+  const occupiesDesk = g.schedule[wk][id][0] === officeVal;
+  check('otherteam does NOT match the desk-occupancy value (excluded from the 6-seat count)', occupiesDesk === false);
+
+  // Same on a holiday day: otherteam should credit office (like 'office' does) and still be
+  // excluded from desk occupancy (judged by literal 'office' on a holiday day).
+  const oHol = 41;
+  const wkHol = g.wkKey(oHol);
+  g.schedule[wkHol] = {};
+  g.MEMBERS.forEach((m) => { g.schedule[wkHol][m.id] = ['otherteam', 'wfh', 'wfh', 'wfh', 'wfh']; });
+  g.holidays[wkHol] = [{ day: 0, name: 'Otherteam Holiday Test' }];
+  check('otherteam on a holiday still credits officeDaysInWeek', g.officeDaysInWeek(id, oHol) === 1);
+  check('otherteam restores availability on a genuine holiday (like office does)', g.availableDaysInWeek(id, oHol) === 5);
+  check('otherteam on a holiday does not match the holiday desk-occupancy value (office)',
+    g.schedule[wkHol][id][0] !== 'office');
+
+  // monthlyBreakdown must credit otherteam the same way as office.
+  const now = new Date();
+  const wkDate = g.wkDates(o)[0];
+  const mOff = (wkDate.getFullYear() - now.getFullYear()) * 12 + (wkDate.getMonth() - now.getMonth());
+  g.schedule[wk][id][0] = 'off';
+  const mbOff = g.monthlyBreakdown(id, mOff);
+  g.schedule[wk][id][0] = 'otherteam';
+  const mbOtherTeam = g.monthlyBreakdown(id, mOff);
+  check('monthlyBreakdown credits an otherteam day the same as an office day',
+    mbOtherTeam.officeDays === mbOff.officeDays);
+
+  // Export builders must tag/color otherteam distinctly from office (O) and wfh (H).
+  check("attendanceTag('otherteam') is 'T' (distinct from office/wfh)", g.attendanceTag('otherteam') === 'T');
+  check("sheetPrefix('otherteam') is distinct from office's '*' and wfh's ''",
+    g.sheetPrefix('otherteam') === '^' && g.sheetPrefix('otherteam') !== g.sheetPrefix('office') && g.sheetPrefix('otherteam') !== g.sheetPrefix('wfh'));
+
+  let tsv, sheetTsv, sheetHtml;
+  try { tsv = g.buildTSV(o, 'local'); } catch (e) { check('buildTSV does not throw with an otherteam entry', false, e.stack); }
+  try { sheetTsv = g.buildSheetTSV(o); } catch (e) { check('buildSheetTSV does not throw with an otherteam entry', false, e.stack); }
+  try { sheetHtml = g.buildSheetHTML(o); } catch (e) { check('buildSheetHTML does not throw with an otherteam entry', false, e.stack); }
+  const memberFirst2 = g.MEMBERS.find((m) => m.id === id).first;
+  const memberNick2 = g.MEMBERS.find((m) => m.id === id).nick;
+  check('buildTSV tags the otherteam member with (T)', !!tsv && tsv.indexOf(memberFirst2 + ' (T)') !== -1);
+  check('buildSheetTSV marks the otherteam member with ^', !!sheetTsv && sheetTsv.split('\n').some((line) => line.indexOf('^' + memberNick2) !== -1));
+  check('buildSheetHTML colors the otherteam member with the distinct blue, not WFO green',
+    !!sheetHtml && sheetHtml.indexOf('#2E75B6') !== -1);
+
+  // Cell classes/labels must be distinct.
+  check("stLabel('otherteam') is 'Other team'", g.stLabel('otherteam') === 'Other team');
+})();
+
+// ===========================================================================
+// 8. Editable display names: renaming a member's display name must update
+//    first/nick for rendering/exports, but the id (the key all historical
+//    schedule/vacation/note data is keyed on) must never change.
+// ===========================================================================
+(function editMemberNameChecks() {
+  const g = makeSandbox();
+  const id = 'karen';
+  const wk = g.wkKey(0);
+  g.schedule[wk] = g.schedule[wk] || {};
+  g.MEMBERS.forEach((m) => { if (!g.schedule[wk][m.id]) g.schedule[wk][m.id] = Array(5).fill('off'); });
+  g.schedule[wk][id][0] = 'wfh'; // some real history tied to this id
+
+  g.prompt = () => 'Karencita';
+  try { g.editMemberName(id); } catch (e) { check('editMemberName() does not throw', false, e.stack); }
+  const renamed = g.MEMBERS.find((m) => m.id === id);
+  check('editMemberName() updates first', renamed.first === 'Karencita');
+  check('editMemberName() updates nick', renamed.nick === 'Karencita');
+  check('editMemberName() does NOT change the id', renamed.id === 'karen');
+  check("historical schedule data keyed by id is untouched by the rename", g.schedule[wk]['karen'][0] === 'wfh');
+
+  // Cancelling the prompt must leave the name untouched.
+  const beforeCancel = g.MEMBERS.find((m) => m.id === id).first;
+  g.prompt = () => null;
+  g.editMemberName(id);
+  check('cancelling editMemberName() leaves the display name unchanged', g.MEMBERS.find((m) => m.id === id).first === beforeCancel);
+
+  // An empty name must be rejected.
+  g._alerted = false;
+  g.alert = () => { g._alerted = true; };
+  g.prompt = () => '   ';
+  g.editMemberName(id);
+  check('editMemberName() rejects a blank display name (alerted, unchanged)',
+    g.MEMBERS.find((m) => m.id === id).first === beforeCancel && g._alerted === true);
 })();
 
 // ===========================================================================

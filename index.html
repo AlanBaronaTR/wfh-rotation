@@ -13,7 +13,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
 .cell{border-radius:5px;padding:3px 2px;font-size:10px;text-align:center;cursor:pointer;border:1.5px solid transparent;transition:all .12s;user-select:none;min-width:0;min-height:42px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;outline:none;}
 .cell:hover{opacity:.85;}.cell:focus{box-shadow:0 0 0 2px #2563EB;}
 .cell.off,.cell.office{background:var(--color-background-secondary);border-color:var(--color-border-tertiary);color:var(--color-text-tertiary);}
-.cell.wfh{background:#2563EB;border-color:#1D4ED8;color:#fff;}.cell.vacation{background:#D97706;border-color:#B45309;color:#fff;}.cell.sick{background:#DC2626;border-color:#B91C1C;color:#fff;}.cell.holiday{background:#7C3AED;border-color:#6D28D9;color:#fff;}.cell.shared{background:#059669;border-color:#047857;color:#fff;}
+.cell.wfh{background:#2563EB;border-color:#1D4ED8;color:#fff;}.cell.vacation{background:#D97706;border-color:#B45309;color:#fff;}.cell.sick{background:#DC2626;border-color:#B91C1C;color:#fff;}.cell.holiday{background:#7C3AED;border-color:#6D28D9;color:#fff;}.cell.shared{background:#059669;border-color:#047857;color:#fff;}.cell.otherteam{background:#4F46E5;border-color:#4338CA;color:#fff;}
 .cell.locked{cursor:default;opacity:.6;}.cell.locked:hover{opacity:.6;}
 .cell.prejoin{cursor:default;background:transparent;border-style:dashed;border-color:var(--color-border-tertiary);color:var(--color-text-tertiary);opacity:.5;}.cell.prejoin:hover{opacity:.5;}
 .shift-chip{font-size:8px;line-height:1.1;padding:1px 5px;border-radius:7px;cursor:pointer;font-weight:600;border:1px solid;white-space:nowrap;}
@@ -36,15 +36,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
 .pick-opt{font-size:11px;padding:3px 9px;border-radius:20px;border:0.5px solid var(--color-border-secondary);cursor:pointer;color:var(--color-text-secondary);background:var(--color-background-secondary);}.pick-opt.active-wfh{background:#2563EB;border-color:#1D4ED8;color:#fff;}.pick-opt.active-vacation{background:#D97706;border-color:#B45309;color:#fff;}.pick-opt.active-sick{background:#DC2626;border-color:#B91C1C;color:#fff;}.pick-opt.active-off{background:var(--color-background-secondary);border-color:var(--color-border-primary);color:var(--color-text-primary);}
 .shift-opt{font-size:11px;padding:3px 10px;border-radius:20px;border:0.5px solid var(--color-border-secondary);cursor:pointer;color:var(--color-text-secondary);background:var(--color-background-secondary);}.shift-opt.active-early{background:#0E7490;border-color:#155E75;color:#fff;}.shift-opt.active-late{background:#A21CAF;border-color:#86198F;color:#fff;}
 .shift-badge{font-size:9px;padding:1px 5px;border-radius:8px;font-weight:500;white-space:nowrap;flex-shrink:0;}.shift-badge.early{background:#CFFAFE;border:0.5px solid #0E7490;color:#155E75;}.shift-badge.late{background:#FAE8FF;border:0.5px solid #A21CAF;color:#86198F;}.shift-badge.mixed{background:var(--color-background-secondary);border:0.5px solid var(--color-border-secondary);color:var(--color-text-secondary);}.shift-badge.tappable{cursor:pointer;}.shift-badge.tappable:hover{filter:brightness(0.96);box-shadow:0 0 0 1.5px currentColor;}
-.pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:20px;border:0.5px solid;}.pill.wfh{background:#2563EB;border-color:#1D4ED8;color:#fff;}.pill.holiday{background:#7C3AED;border-color:#6D28D9;color:#fff;}.pill.vacation{background:#D97706;border-color:#B45309;color:#fff;}.pill.sick{background:#DC2626;border-color:#B91C1C;color:#fff;}.pill.shared{background:#059669;border-color:#047857;color:#fff;}.pill.off{background:var(--color-background-secondary);border-color:var(--color-border-secondary);color:var(--color-text-secondary);}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:20px;border:0.5px solid;}.pill.wfh{background:#2563EB;border-color:#1D4ED8;color:#fff;}.pill.holiday{background:#7C3AED;border-color:#6D28D9;color:#fff;}.pill.vacation{background:#D97706;border-color:#B45309;color:#fff;}.pill.sick{background:#DC2626;border-color:#B91C1C;color:#fff;}.pill.shared{background:#059669;border-color:#047857;color:#fff;}.pill.otherteam{background:#4F46E5;border-color:#4338CA;color:#fff;}.pill.off{background:var(--color-background-secondary);border-color:var(--color-border-secondary);color:var(--color-text-secondary);}
 .section-title{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:7px;}
 .cnt-ok{color:#27500A;font-weight:500;}.cnt-warn{color:#633806;font-weight:500;}.cnt-fail{color:#791F1F;font-weight:500;}
 .wk-block{border:0.5px solid var(--color-border-tertiary);border-radius:8px;overflow:hidden;margin-bottom:8px;}.wk-header{background:var(--color-background-secondary);padding:6px 12px;font-size:12px;font-weight:500;color:var(--color-text-secondary);display:flex;align-items:center;justify-content:space-between;}
-.monthly-cell{border-radius:4px;padding:3px 1px;font-size:10px;text-align:center;border:1.5px solid transparent;min-height:24px;display:flex;align-items:center;justify-content:center;}.monthly-cell.off,.monthly-cell.office{background:var(--color-background-secondary);border-color:var(--color-border-tertiary);color:var(--color-text-tertiary);}.monthly-cell.wfh,.monthly-cell.shared{background:#2563EB;border-color:#1D4ED8;color:#fff;}.monthly-cell.vacation{background:#D97706;border-color:#B45309;color:#fff;}.monthly-cell.sick{background:#DC2626;border-color:#B91C1C;color:#fff;}.monthly-cell.holiday{background:#7C3AED;border-color:#6D28D9;color:#fff;}.monthly-cell.prejoin{background:transparent;border-style:dashed;border-color:var(--color-border-tertiary);color:var(--color-text-tertiary);opacity:.4;}
+.monthly-cell{border-radius:4px;padding:3px 1px;font-size:10px;text-align:center;border:1.5px solid transparent;min-height:24px;display:flex;align-items:center;justify-content:center;}.monthly-cell.off,.monthly-cell.office{background:var(--color-background-secondary);border-color:var(--color-border-tertiary);color:var(--color-text-tertiary);}.monthly-cell.wfh,.monthly-cell.shared{background:#2563EB;border-color:#1D4ED8;color:#fff;}.monthly-cell.vacation{background:#D97706;border-color:#B45309;color:#fff;}.monthly-cell.sick{background:#DC2626;border-color:#B91C1C;color:#fff;}.monthly-cell.holiday{background:#7C3AED;border-color:#6D28D9;color:#fff;}.monthly-cell.otherteam{background:#4F46E5;border-color:#4338CA;color:#fff;}.monthly-cell.prejoin{background:transparent;border-style:dashed;border-color:var(--color-border-tertiary);color:var(--color-text-tertiary);opacity:.4;}
 .note-input{font-size:11px;padding:5px 8px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);width:100%;resize:none;font-family:inherit;}.note-input:focus{outline:none;border-color:#378ADD;background:var(--color-background-primary);}
 .note-dot{width:6px;height:6px;border-radius:50%;background:#2563EB;display:inline-block;flex-shrink:0;}
 .export-card{background:#fff;border:1px solid #E5E7EB;border-radius:12px;overflow:hidden;margin-top:12px;}.export-card-header{background:#F9FAFB;padding:14px 20px 12px;border-bottom:1px solid #E5E7EB;}.export-table{width:100%;border-collapse:collapse;}.export-table th{padding:8px 6px;font-size:11px;font-weight:500;color:#6B7280;text-align:center;border-bottom:2px solid #E5E7EB;}.export-table td{padding:6px;border-bottom:1px solid #F3F4F6;vertical-align:middle;}
-.ecell{border-radius:7px;padding:6px 4px;font-size:11px;font-weight:500;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:38px;border:1.5px solid transparent;}.ecell.off,.ecell.office{background:#F3F4F6;border-color:#E5E7EB;color:#6B7280;}.ecell.wfh{background:#2563EB;border-color:#1D4ED8;color:#fff;}.ecell.shared{background:#059669;border-color:#047857;color:#fff;}.ecell.vacation{background:#D97706;border-color:#B45309;color:#fff;}.ecell.sick{background:#DC2626;border-color:#B91C1C;color:#fff;}.ecell.holiday{background:#7C3AED;border-color:#6D28D9;color:#fff;}.ecell.prejoin{background:#FAFAFA;border-style:dashed;border-color:#E5E7EB;color:#C0C5CE;}
+.ecell{border-radius:7px;padding:6px 4px;font-size:11px;font-weight:500;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:38px;border:1.5px solid transparent;}.ecell.off,.ecell.office{background:#F3F4F6;border-color:#E5E7EB;color:#6B7280;}.ecell.wfh{background:#2563EB;border-color:#1D4ED8;color:#fff;}.ecell.shared{background:#059669;border-color:#047857;color:#fff;}.ecell.vacation{background:#D97706;border-color:#B45309;color:#fff;}.ecell.sick{background:#DC2626;border-color:#B91C1C;color:#fff;}.ecell.holiday{background:#7C3AED;border-color:#6D28D9;color:#fff;}.ecell.otherteam{background:#4F46E5;border-color:#4338CA;color:#fff;}.ecell.prejoin{background:#FAFAFA;border-style:dashed;border-color:#E5E7EB;color:#C0C5CE;}
 .badge-pending{font-size:10px;padding:1px 6px;border-radius:10px;background:#FEF9C3;border:0.5px solid #EAB308;color:#854D0E;}
 .lock-badge{font-size:10px;padding:1px 5px;border-radius:8px;background:#F3F4F6;border:0.5px solid #D1D5DB;color:#6B7280;}
 .copy-area{width:100%;min-height:120px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1.5;padding:10px 12px;border-radius:8px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);resize:vertical;white-space:pre;}.copy-area:focus{outline:none;border-color:#378ADD;}
@@ -80,7 +80,8 @@ var I={
   sunset:'M3 17h1M20 17h1M6.31 10.31l.7.7M17.39 11.01l.7-.7M4 21h16M12 17a4 4 0 004-4M12 3v4',
   shuffle:'M18 4l3 3-3 3M18 20l3-3-3-3M3 7h3a5 5 0 015 5 5 5 0 005 5h3M21 7h-3a5 5 0 00-5 5',
   note:'M6 3H18a3 3 0 013 3v12a3 3 0 01-3 3H6a3 3 0 01-3-3V6a3 3 0 013-3M9 12h6M9 8h6M9 16h3',
-  userplus:'M8 7a4 4 0 108 0 4 4 0 00-8 0M6 21v-2a4 4 0 014-4h3M16 11v4M14 13h4'
+  userplus:'M8 7a4 4 0 108 0 4 4 0 00-8 0M6 21v-2a4 4 0 014-4h3M16 11v4M14 13h4',
+  pin:'M12 22s8-7.58 8-13a8 8 0 10-16 0c0 5.42 8 13 8 13zM12 12a3 3 0 100-6 3 3 0 000 6z'
 };
 function ico(n,sz){sz=sz||14;var d=I[n]||'';return '<svg width="'+sz+'" height="'+sz+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;flex-shrink:0;"><path d="'+d+'"/></svg>';}
 
@@ -126,7 +127,10 @@ var AVATAR_PALETTE=[
   {av:'#FECACA',ac:'#DC2626'},{av:'#BEF264',ac:'#3F6212'},{av:'#A5F3FC',ac:'#0E7490'},
   {av:'#DDD6FE',ac:'#5B21B6'}
 ];
-var DAYS=['Mon','Tue','Wed','Thu','Fri'],CYCLE=['off','wfh','vacation','sick'],MANDATE=3;
+// 'otherteam' = working, but with a different team that day — e.g. temporarily on loan — so it
+// still counts toward the person's own office-day mandate (they're working from an office, just
+// not this one), but must NOT count toward this team's desk limit (they're not in one of our seats).
+var DAYS=['Mon','Tue','Wed','Thu','Fri'],CYCLE=['off','wfh','vacation','sick','otherteam'],MANDATE=3;
 var view='week',wkOffset=0,monthOffset=0,suggestedOffset=null,showExport=false,showCopy=false,showTeams=false,copyMode='sheet',teamsDark=true;
 var lockedWeeks=new Set(),undoStack=[],notes={},weekShift={},shiftOv={},schedule={},holidays={},dismissedAlerts=new Set(),vacationLog=[],hiddenMembers=new Set();
 var lastPublishedAt=null,publishLog=[],UNPUBLISHED_BASELINE=null;
@@ -263,7 +267,7 @@ function activeMembers(o){if(o===undefined)o=(view==='week'?wkOffset:0);return M
 function allActiveMembers(o){if(o===undefined)o=(view==='week'?wkOffset:0);return MEMBERS.filter(function(m){return memberInWeek(m.id,o);});} // includes hidden, for desk counting
 function toggleHidden(id){if(hiddenMembers.has(id))hiddenMembers.delete(id);else hiddenMembers.add(id);render();}
 function monthMembers(mOff){var offs=getMonthWeekOffsets(mOff);return MEMBERS.filter(function(m){return offs.some(function(o){return memberInWeek(m.id,o);});});}
-function isWorking(raw){return raw==='off'||raw==='wfh'||raw==='office';}
+function isWorking(raw){return raw==='off'||raw==='wfh'||raw==='office'||raw==='otherteam';}
 function getWeekShift(o,id){if(!splitActive(o))return'10';var k=wkKey(o);if(!weekShift[k])weekShift[k]={};if(!weekShift[k][id])weekShift[k][id]=MEMBERS.find(function(m){return m.id===id;}).shift||'10';weekShift[k][id]=migrateShift(weekShift[k][id]);return weekShift[k][id];}
 function setWeekShift(o,id,sh){var k=wkKey(o);if(!weekShift[k])weekShift[k]={};weekShift[k][id]=sh;if(shiftOv[k])shiftOv[k][id]=Array(5).fill(null);render();}
 function toggleWeekShift(o,id){if(isLocked(o)||!splitActive(o))return;var cur=memberDisplayShift(o,id);var idx=SHIFT_ORDER.indexOf(cur);var next=SHIFT_ORDER[(idx+1)%SHIFT_ORDER.length];setWeekShift(o,id,next);}
@@ -277,15 +281,20 @@ function navBack(){if(view==='week')wkOffset--;else monthOffset--;showExport=fal
 function navFwd(){if(view==='week')wkOffset++;else monthOffset++;showExport=false;showCopy=false;dismissedAlerts.clear();render();}
 function getMonthWeekOffsets(mOff){var now=new Date(),target=new Date(now.getFullYear(),now.getMonth()+mOff,1),y=target.getFullYear(),m=target.getMonth(),res=[];for(var off=-52;off<=52;off++){if(wkDates(off).some(function(d){return d.getFullYear()===y&&d.getMonth()===m;}))res.push(off);}return[...new Set(res)];}
 // A genuine Mexican holiday excludes its day from the "available" pool UNLESS someone is
-// physically working from the office that day (raw 'office') — working from home on a genuine
-// holiday does NOT restore availability, only actually coming in does. A holiday with
-// mandateApplies:true (e.g. a US holiday observed here, but not an excused day off) never
-// excludes the day at all, worked or not — see the holiday seed comment.
-function availableDaysInWeek(id,o){var s=getSched(o),hols=getHols(o);var c=0;for(var d=0;d<5;d++){if(isPreJoin(id,o,d))continue;var hol=hols.find(function(h){return h.day===d;}),raw=s[id][d];if(hol&&!hol.mandateApplies&&raw!=='office')continue;if(raw!=='vacation'&&raw!=='sick')c++;}return c;}
-function officeDaysInWeek(id,o){var s=getSched(o),hd=getHols(o).map(function(h){return h.day;});var c=0;for(var d=0;d<5;d++){if(isPreJoin(id,o,d))continue;if(hd.includes(d)){if(s[id][d]==='office')c++;continue;}if(s[id][d]==='off')c++;}return c;}
-function officeDaysInMonth(id,mOff){var offs=getMonthWeekOffsets(mOff),now=new Date(),target=new Date(now.getFullYear(),now.getMonth()+mOff,1),y=target.getFullYear(),m=target.getMonth();var c=0;offs.forEach(function(o){var dates=wkDates(o),hd=getHols(o).map(function(h){return h.day;});for(var d=0;d<5;d++){if(dates[d].getFullYear()!==y||dates[d].getMonth()!==m)continue;if(isPreJoin(id,o,d))continue;var raw=getSched(o)[id][d];if(hd.includes(d)){if(raw==='office')c++;continue;}if(raw==='off')c++;}});return c;}
+// physically working from an office that day (raw 'office' or 'otherteam' — the latter is still
+// an office, just not ours) — working from home on a genuine holiday does NOT restore
+// availability, only actually coming in (anywhere) does. A holiday with mandateApplies:true (e.g.
+// a US holiday observed here, but not an excused day off) never excludes the day at all, worked
+// or not — see the holiday seed comment.
+function availableDaysInWeek(id,o){var s=getSched(o),hols=getHols(o);var c=0;for(var d=0;d<5;d++){if(isPreJoin(id,o,d))continue;var hol=hols.find(function(h){return h.day===d;}),raw=s[id][d];if(hol&&!hol.mandateApplies&&raw!=='office'&&raw!=='otherteam')continue;if(raw!=='vacation'&&raw!=='sick')c++;}return c;}
+// 'otherteam' counts toward the office-day mandate wherever plain 'off'/'office' would — the
+// person is still working from an office, just not this team's, so it still satisfies their
+// personal in-office requirement (it just never counts toward THIS team's desk limit, which is
+// handled separately in the desk-limit alert by checking for the literal 'off'/'office' value).
+function officeDaysInWeek(id,o){var s=getSched(o),hd=getHols(o).map(function(h){return h.day;});var c=0;for(var d=0;d<5;d++){if(isPreJoin(id,o,d))continue;if(hd.includes(d)){if(s[id][d]==='office'||s[id][d]==='otherteam')c++;continue;}if(s[id][d]==='off'||s[id][d]==='otherteam')c++;}return c;}
+function officeDaysInMonth(id,mOff){var offs=getMonthWeekOffsets(mOff),now=new Date(),target=new Date(now.getFullYear(),now.getMonth()+mOff,1),y=target.getFullYear(),m=target.getMonth();var c=0;offs.forEach(function(o){var dates=wkDates(o),hd=getHols(o).map(function(h){return h.day;});for(var d=0;d<5;d++){if(dates[d].getFullYear()!==y||dates[d].getMonth()!==m)continue;if(isPreJoin(id,o,d))continue;var raw=getSched(o)[id][d];if(hd.includes(d)){if(raw==='office'||raw==='otherteam')c++;continue;}if(raw==='off'||raw==='otherteam')c++;}});return c;}
 function mandateForMonth(id,mOff){return MANDATE*getMonthWeekOffsets(mOff).filter(function(o){return memberInWeek(id,o);}).length;}
-function monthlyOfficeSoFar(id,mOff){var offs=getMonthWeekOffsets(mOff),now=new Date(),target=new Date(now.getFullYear(),now.getMonth()+mOff,1),y=target.getFullYear(),m=target.getMonth();var c=0;offs.forEach(function(o){var dates=wkDates(o),hd=getHols(o).map(function(h){return h.day;}),s=getSched(o);for(var d=0;d<5;d++){if(dates[d].getFullYear()!==y||dates[d].getMonth()!==m)continue;if(dates[d]>now)continue;if(isPreJoin(id,o,d))continue;if(hd.includes(d)){if(s[id][d]==='office')c++;continue;}if(s[id][d]==='off')c++;}});return c;}
+function monthlyOfficeSoFar(id,mOff){var offs=getMonthWeekOffsets(mOff),now=new Date(),target=new Date(now.getFullYear(),now.getMonth()+mOff,1),y=target.getFullYear(),m=target.getMonth();var c=0;offs.forEach(function(o){var dates=wkDates(o),hd=getHols(o).map(function(h){return h.day;}),s=getSched(o);for(var d=0;d<5;d++){if(dates[d].getFullYear()!==y||dates[d].getMonth()!==m)continue;if(dates[d]>now)continue;if(isPreJoin(id,o,d))continue;if(hd.includes(d)){if(s[id][d]==='office'||s[id][d]==='otherteam')c++;continue;}if(s[id][d]==='off'||s[id][d]==='otherteam')c++;}});return c;}
 function weeksRemainingInMonth(id,mOff){return getMonthWeekOffsets(mOff).filter(function(o){return getMonday(o)>new Date()&&memberInWeek(id,o);}).length;}
 function pushUndo(o){var s=getSched(o),snap={o:o,data:{}};MEMBERS.forEach(function(m){snap.data[m.id]=[...s[m.id]];});undoStack.push(snap);if(undoStack.length>30)undoStack.shift();}
 function undo(){if(!undoStack.length)return;var snap=undoStack.pop();MEMBERS.forEach(function(m){if(snap.data[m.id])schedule[wkKey(snap.o)][m.id]=[...snap.data[m.id]];});render();}
@@ -297,7 +306,7 @@ function undo(){if(!undoStack.length)return;var snap=undoStack.pop();MEMBERS.for
 // and sick correctly regardless of holiday status, since the vacation-log feature already relied
 // on that; this cycle just exposes the same values via a direct click instead of only via the
 // vacation log form.
-var HOL_CYCLE=['off','office','wfh','vacation','sick'];
+var HOL_CYCLE=['off','office','wfh','vacation','sick','otherteam'];
 function cycleCell(id,di,o){if(isPreJoin(id,o,di))return;var hd=getHols(o).map(function(h){return h.day;});var isHol=hd.includes(di);if(isLocked(o)&&!isHol)return;pushUndo(o);var s=getSched(o);if(isHol){var cur=s[id][di],idx=HOL_CYCLE.indexOf(cur);s[id][di]=HOL_CYCLE[(idx<0?0:idx+1)%HOL_CYCLE.length];}else{s[id][di]=CYCLE[(CYCLE.indexOf(s[id][di])+1)%CYCLE.length];}render();}
 function setDayState(id,di,st,o){if(isLocked(o)||isPreJoin(id,o,di))return;pushUndo(o);getSched(o)[id][di]=st;render();}
 function toggleLock(){var k=wkKey(wkOffset);if(lockedWeeks.has(k))lockedWeeks.delete(k);else lockedWeeks.add(k);render();}
@@ -431,27 +440,46 @@ function addMember(){
   ['mem-name','mem-display','mem-initials','mem-join'].forEach(function(elId){var el=document.getElementById(elId);if(el)el.value='';});
   render();
 }
-function departMember(id){
+function canHardDelete(id){return!PUBLISHED_MEMBER_IDS.has(id)&&!memberHasHistory(id);}
+// Single "x" entry point: hard-deletes a member with zero history who was never published (a
+// just-added mistake — nothing to lose), otherwise soft-removes them as of today, preserving all
+// past-week history. Which path runs is decided automatically — the confirm text always makes
+// clear which one is happening.
+function removeMember(id){
   var m=MEMBERS.find(function(mm){return mm.id===id;});
   if(!m)return;
-  var def=m.leaveDate||dStr(new Date());
-  var ld=prompt(m.first+' — leave date (YYYY-MM-DD). They stop appearing (and stop counting toward the mandate/desk limit) in weeks on or after this date; everything before it is unchanged:',def);
-  if(ld===null)return;
-  ld=ld.trim();
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(ld)){alert('Please enter a date as YYYY-MM-DD.');return;}
-  m.leaveDate=ld;
+  if(canHardDelete(id)){
+    if(!confirm('Remove '+m.first+' entirely? They were never published and have no schedule history yet, so nothing is lost — but this cannot be undone.'))return;
+    MEMBERS=MEMBERS.filter(function(mm){return mm.id!==id;});
+    hiddenMembers.delete(id);
+    render();
+    return;
+  }
+  if(!confirm('Remove '+m.first+' from the schedule as of today? Past weeks stay unchanged, and you can re-add them anytime if they come back (e.g. after a secondment).'))return;
+  m.leaveDate=dStr(new Date());
   render();
 }
-function undoDepart(id){var m=MEMBERS.find(function(mm){return mm.id===id;});if(!m)return;delete m.leaveDate;render();}
-function canHardDelete(id){return!PUBLISHED_MEMBER_IDS.has(id)&&!memberHasHistory(id);}
-function removeMemberHard(id){
-  if(PUBLISHED_MEMBER_IDS.has(id)){alert('This member is already part of the published roster — use "Mark as departed" instead, so past weeks stay intact.');return;}
-  if(memberHasHistory(id)){alert('This member already has schedule/vacation/note history — use "Mark as departed" instead, so past weeks stay intact.');return;}
+// Re-adding sets a FRESH joinDate (today), rather than just clearing leaveDate — that correctly
+// excludes the gap in between (e.g. a secondment elsewhere) from their history/mandate, instead of
+// silently implying they were on the team the whole time.
+function reAddMember(id){
   var m=MEMBERS.find(function(mm){return mm.id===id;});
   if(!m)return;
-  if(!confirm('Remove '+m.first+' entirely? They were never published and have no schedule history yet, so nothing is lost — but this cannot be undone.'))return;
-  MEMBERS=MEMBERS.filter(function(mm){return mm.id!==id;});
-  hiddenMembers.delete(id);
+  delete m.leaveDate;
+  m.joinDate=dStr(new Date());
+  render();
+}
+// Editing display name only ever touches first/nick — id (the schedule/vacation-log/notes
+// reference key) never changes, so historical data always stays correctly linked.
+function editMemberName(id){
+  var m=MEMBERS.find(function(mm){return mm.id===id;});
+  if(!m)return;
+  var val=prompt('Display name for this teammate:',m.first);
+  if(val===null)return;
+  val=val.trim();
+  if(!val){alert('Display name cannot be empty.');return;}
+  m.first=val;
+  m.nick=val;
   render();
 }
 function vacLabel(entry){
@@ -461,8 +489,8 @@ function vacLabel(entry){
   return m.first+': '+dateStr+(entry.note?' ('+entry.note+')':'');
 }
 function vacStartChanged(){var s=document.getElementById('vac-start');var e=document.getElementById('vac-end');if(s.value&&!e.value)e.value=s.value;}
-function stLabel(st){return st==='wfh'||st==='shared'?'WFH':st==='vacation'?'Vacation':st==='sick'?'Sick':st==='holiday'?'Holiday':'Office';}
-function cellIcon(st){if(st==='wfh'||st==='shared')return ico('home',13);if(st==='vacation')return ico('beach',12);if(st==='sick')return ico('heartoff',12);if(st==='holiday')return ico('flag',12);return ico('briefcase',12);}
+function stLabel(st){return st==='wfh'||st==='shared'?'WFH':st==='vacation'?'Vacation':st==='sick'?'Sick':st==='holiday'?'Holiday':st==='otherteam'?'Other team':'Office';}
+function cellIcon(st){if(st==='wfh'||st==='shared')return ico('home',13);if(st==='vacation')return ico('beach',12);if(st==='sick')return ico('heartoff',12);if(st==='holiday')return ico('flag',12);if(st==='otherteam')return ico('pin',12);return ico('briefcase',12);}
 function complyClass(a,m){return a>=m?'cnt-ok':a>=m-1?'cnt-warn':'cnt-fail';}
 function hasNote(o,id){return!!(notes['note_'+wkKey(o)+'_'+id]||'').trim();}
 function dnKey(o,id,d){return'dn_'+wkKey(o)+'_'+id+'_'+d;}
@@ -477,10 +505,10 @@ function monthlyBreakdown(id,mOff){
       var raw=s[id][d],hol=hols.find(function(h){return h.day===d;});
       if(raw==='vacation'){vacDays++;continue;}
       if(raw==='sick'){sickDays++;continue;}
-      if(hol&&raw==='office'){officeDays++;continue;}
-      if(hol&&!hol.mandateApplies){holDays++;if(raw==='wfh')wfhDays++;continue;} // genuine holiday, not physically in office (off or wfh) -> unavailable
+      if(hol&&(raw==='office'||raw==='otherteam')){officeDays++;continue;}
+      if(hol&&!hol.mandateApplies){holDays++;if(raw==='wfh')wfhDays++;continue;} // genuine holiday, not physically in any office (off or wfh) -> unavailable
       if(hol&&hol.mandateApplies&&raw==='off')continue; // mandateApplies: still available, but no office credit for not working
-      if(raw==='off')officeDays++;
+      if(raw==='off'||raw==='otherteam')officeDays++;
       else if(raw==='wfh')wfhDays++;
     }
   });
@@ -500,7 +528,12 @@ function editDayNote(o,id,d){
   if(val.trim())notes[key]=val.trim();else delete notes[key];
   render();
 }
-function buildTSV(o,mode){var dates=wkDates(o),sched=getSched(o),hols=getHols(o),holDays=hols.map(function(h){return h.day;}),act=activeMembers(o),split=splitActive(o);var fmt=new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short'});var weekLabel=fmt.format(dates[0])+'–'+fmt.format(dates[4]);var lines=[];lines.push([weekLabel].concat(DAYS).join('\t'));var bands=split?SHIFT_ORDER.filter(function(s){return act.some(function(m){for(var dd=0;dd<5;dd++){if(!isPreJoin(m.id,o,dd)&&isWorking(sched[m.id][dd])&&effShift(o,m.id,dd)===s)return true;}return false;});}):['10'];bands.forEach(function(band){var label=mode==='ist'?SHIFTS[band].ist+' (MX)':SHIFTS[band].full;var cells=[label];for(var d=0;d<5;d++){if(holDays.includes(d)){var hnames=act.filter(function(m){if(isPreJoin(m.id,o,d))return false;var raw=sched[m.id][d];return(raw==='wfh'||raw==='office')&&effShift(o,m.id,d)===band;}).map(function(m){return m.first+' ('+(sched[m.id][d]==='office'?'O':'H')+')';});cells.push(hnames.length?hnames.join(', '):'Holiday');continue;}var names=act.filter(function(m){if(isPreJoin(m.id,o,d))return false;var raw=sched[m.id][d];return isWorking(raw)&&effShift(o,m.id,d)===band;}).map(function(m){return m.first+' ('+(sched[m.id][d]==='off'?'O':'H')+')';});cells.push(names.join(', '));}lines.push(cells.join('\t'));});var leaveCells=['Leaves'];for(var d=0;d<5;d++){var names=act.filter(function(m){if(isPreJoin(m.id,o,d))return false;var raw=sched[m.id][d];return raw==='vacation'||raw==='sick';}).map(function(m){return m.first+' ('+(sched[m.id][d]==='vacation'?'V':'S')+')';});leaveCells.push(names.join(', '));}lines.push(leaveCells.join('\t'));lines.push(['Key','(O) office','(H) home','(V) vacation','(S) sick'].join('\t'));return lines.join('\n');}
+// Attendance tag shared by the TSV export builders: (O) office, (H) home, (T) with another team.
+function attendanceTag(raw){if(raw==='off'||raw==='office')return'O';if(raw==='otherteam')return'T';return'H';}
+function buildTSV(o,mode){var dates=wkDates(o),sched=getSched(o),hols=getHols(o),holDays=hols.map(function(h){return h.day;}),act=activeMembers(o),split=splitActive(o);var fmt=new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short'});var weekLabel=fmt.format(dates[0])+'–'+fmt.format(dates[4]);var lines=[];lines.push([weekLabel].concat(DAYS).join('\t'));var bands=split?SHIFT_ORDER.filter(function(s){return act.some(function(m){for(var dd=0;dd<5;dd++){if(!isPreJoin(m.id,o,dd)&&isWorking(sched[m.id][dd])&&effShift(o,m.id,dd)===s)return true;}return false;});}):['10'];bands.forEach(function(band){var label=mode==='ist'?SHIFTS[band].ist+' (MX)':SHIFTS[band].full;var cells=[label];for(var d=0;d<5;d++){if(holDays.includes(d)){var hnames=act.filter(function(m){if(isPreJoin(m.id,o,d))return false;var raw=sched[m.id][d];return(raw==='wfh'||raw==='office'||raw==='otherteam')&&effShift(o,m.id,d)===band;}).map(function(m){return m.first+' ('+attendanceTag(sched[m.id][d])+')';});cells.push(hnames.length?hnames.join(', '):'Holiday');continue;}var names=act.filter(function(m){if(isPreJoin(m.id,o,d))return false;var raw=sched[m.id][d];return isWorking(raw)&&effShift(o,m.id,d)===band;}).map(function(m){return m.first+' ('+attendanceTag(sched[m.id][d])+')';});cells.push(names.join(', '));}lines.push(cells.join('\t'));});var leaveCells=['Leaves'];for(var d=0;d<5;d++){var names=act.filter(function(m){if(isPreJoin(m.id,o,d))return false;var raw=sched[m.id][d];return raw==='vacation'||raw==='sick';}).map(function(m){return m.first+' ('+(sched[m.id][d]==='vacation'?'V':'S')+')';});leaveCells.push(names.join(', '));}lines.push(leaveCells.join('\t'));lines.push(['Key','(O) office','(H) home','(T) other team','(V) vacation','(S) sick'].join('\t'));return lines.join('\n');}
+// Sheet-format prefix: '*' for WFO (colored green in buildSheetHTML), '^' for working with
+// another team (colored blue), no prefix for WFH.
+function sheetPrefix(raw){return(raw==='off'||raw==='office')?'*':raw==='otherteam'?'^':'';}
 function buildSheetTSV(o){
   var dates=wkDates(o),sched=getSched(o),hols=getHols(o),holDays=hols.map(function(h){return h.day;}),act=activeMembers(o),split=splitActive(o);
   var mon=dates[0],fri=dates[4];
@@ -518,16 +551,16 @@ function buildSheetTSV(o){
       if(holDays.includes(d)){
         var holObj=hols.find(function(h){return h.day===d;});
         // Include anyone working (wfh or office) on the holiday
-        var working=act.filter(function(m){if(isPreJoin(m.id,o,d))return false;var raw=sched[m.id][d];return raw==='wfh'||raw==='office';}).map(function(m){return(sched[m.id][d]==='office'?'*':'')+m.nick;});
+        var working=act.filter(function(m){if(isPreJoin(m.id,o,d))return false;var raw=sched[m.id][d];return raw==='wfh'||raw==='office'||raw==='otherteam';}).map(function(m){return sheetPrefix(sched[m.id][d])+m.nick;});
         cells.push(working.length>0?working.join(' '):'');
         continue;
       }
-      var names=act.filter(function(m){if(isPreJoin(m.id,o,d))return false;var raw=sched[m.id][d];return isWorking(raw)&&effShift(o,m.id,d)===band;}).map(function(m){return(sched[m.id][d]==='off'?'*':'')+m.nick;});
+      var names=act.filter(function(m){if(isPreJoin(m.id,o,d))return false;var raw=sched[m.id][d];return isWorking(raw)&&effShift(o,m.id,d)===band;}).map(function(m){return sheetPrefix(sched[m.id][d])+m.nick;});
       cells.push(names.join(' '));
     }
     lines.push(cells.join('\t'));
   });
-  lines.push(['Key','WFH (black)','*WFO (green)'].join('\t'));
+  lines.push(['Key','WFH (black)','*WFO (green)','^Other team (blue)'].join('\t'));
   // Leaves row
   var leaveCells=['Leaves'];
   for(var d=0;d<5;d++){
@@ -576,12 +609,13 @@ function buildTeamsHTML(o){
       else if(st==='holiday'){cellBg='#7C3AED';cellTx='#FFFFFF';label='HOL';}
       else if(st==='vacation'){cellBg='#D97706';cellTx='#FFFFFF';label='VAC';}
       else if(st==='sick'){cellBg='#DC2626';cellTx='#FFFFFF';label='SICK';}
+      else if(st==='otherteam'){cellBg='#4F46E5';cellTx='#FFFFFF';label='OTHER';}
       else{cellBg=officeBg;cellTx=officeTx;label='Office';}
       h+='<td bgcolor="'+cellBg+'" align="center" style="color:'+cellTx+';font-weight:bold;font-size:11px;border-color:'+borderC+';">'+label+'</td>';
     }
     h+='</tr>';
   });
-  h+='<tr bgcolor="'+pageBg+'"><td colspan="6" style="font-size:10px;color:'+textSec+';border-color:'+borderC+';"><span style="background:#2563EB;color:#fff;padding:1px 4px;">WFH</span> <span style="background:#7C3AED;color:#fff;padding:1px 4px;">HOL</span> <span style="background:#D97706;color:#fff;padding:1px 4px;">VAC</span> <span style="background:#DC2626;color:#fff;padding:1px 4px;">SICK</span> <span style="background:'+officeBg+';color:'+officeTx+';padding:1px 4px;border:1px solid '+borderC+';">Office</span></td></tr>';
+  h+='<tr bgcolor="'+pageBg+'"><td colspan="6" style="font-size:10px;color:'+textSec+';border-color:'+borderC+';"><span style="background:#2563EB;color:#fff;padding:1px 4px;">WFH</span> <span style="background:#7C3AED;color:#fff;padding:1px 4px;">HOL</span> <span style="background:#D97706;color:#fff;padding:1px 4px;">VAC</span> <span style="background:#DC2626;color:#fff;padding:1px 4px;">SICK</span> <span style="background:#4F46E5;color:#fff;padding:1px 4px;">OTHER</span> <span style="background:'+officeBg+';color:'+officeTx+';padding:1px 4px;border:1px solid '+borderC+';">Office</span></td></tr>';
   h+='</table>';
   return h;
 }
@@ -591,7 +625,7 @@ function buildTeamsPlain(o){
   var mon=dates[0],fri=dates[4],dayNames=['Mon','Tue','Wed','Thu','Fri'];
   var tzLabel=shiftTZ==='mx'?'MX (CST)':shiftTZ==='et'?'ET':'IST';
   var lines=['WFH Rotation · '+mNames[mon.getMonth()]+' '+mon.getDate()+'–'+fri.getDate()+' ('+tzLabel+')',''];
-  act.forEach(function(m){var sh=memberDisplayShift(o,m.id);var row=m.first+' ('+shiftShortLabel(sh)+'):';for(var d=0;d<5;d++){var isHol=holDays.includes(d);var raw=sched[m.id][d];var st=(isHol&&raw==='off')?'holiday':raw;row+=' '+(st==='wfh'?'🏠':st==='holiday'?'🚩':st==='vacation'?'🏖️':st==='sick'?'🤒':'🏢');}lines.push(row);});
+  act.forEach(function(m){var sh=memberDisplayShift(o,m.id);var row=m.first+' ('+shiftShortLabel(sh)+'):';for(var d=0;d<5;d++){var isHol=holDays.includes(d);var raw=sched[m.id][d];var st=(isHol&&raw==='off')?'holiday':raw;row+=' '+(st==='wfh'?'🏠':st==='holiday'?'🚩':st==='vacation'?'🏖️':st==='sick'?'🤒':st==='otherteam'?'📍':'🏢');}lines.push(row);});
   return lines.join('\n');
 }
 function copyTSV(){
@@ -621,7 +655,8 @@ function buildSheetHTML(o){
   var mon=dates[0],fri=dates[4];
   var weekLabel=mNames[mon.getMonth()]+' '+mon.getDate()+'-'+fri.getDate();
   var dayHeaders=['Mon','Tues','Weds','Thurs','Fri'];
-  var green='#00B050';
+  var green='#00B050',otherTeamColor='#2E75B6';
+  function nameColor(raw){return(raw==='off'||raw==='office')?green:raw==='otherteam'?otherTeamColor:'#000000';}
   var h='<table style="border-collapse:collapse;font-family:Calibri,sans-serif;font-size:11pt;">';
   // Header row
   h+='<tr><td style="padding:4px 8px;font-weight:bold;background:#FFFF00;">'+weekLabel+'</td>';
@@ -634,24 +669,23 @@ function buildSheetHTML(o){
     h+='<tr><td style="padding:4px 8px;font-weight:bold;">'+label+'</td>';
     for(var d2=0;d2<5;d2++){
       if(holDays.includes(d2)){
-        var hnames=act.filter(function(m){if(isPreJoin(m.id,o,d2))return false;var raw=sched[m.id][d2];return(raw==='wfh'||raw==='office')&&effShift(o,m.id,d2)===band;});
+        var hnames=act.filter(function(m){if(isPreJoin(m.id,o,d2))return false;var raw=sched[m.id][d2];return(raw==='wfh'||raw==='office'||raw==='otherteam')&&effShift(o,m.id,d2)===band;});
         var hcell='';
-        hnames.forEach(function(m,i){var isOff=sched[m.id][d2]==='office';hcell+=(i>0?' ':'')+('<span style="color:'+(isOff?green:'#000000')+';">'+m.nick+'</span>');});
+        hnames.forEach(function(m,i){hcell+=(i>0?' ':'')+('<span style="color:'+nameColor(sched[m.id][d2])+';">'+m.nick+'</span>');});
         h+='<td style="padding:4px 8px;">'+hcell+'</td>';
         continue;
       }
       var names=act.filter(function(m){if(isPreJoin(m.id,o,d2))return false;var raw=sched[m.id][d2];return isWorking(raw)&&effShift(o,m.id,d2)===band;});
       var cell='';
       names.forEach(function(m,i){
-        var isWFO=sched[m.id][d2]==='off';
-        cell+=(i>0?' ':'')+('<span style="color:'+(isWFO?green:'#000000')+';">'+m.nick+'</span>');
+        cell+=(i>0?' ':'')+('<span style="color:'+nameColor(sched[m.id][d2])+';">'+m.nick+'</span>');
       });
       h+='<td style="padding:4px 8px;">'+cell+'</td>';
     }
     h+='</tr>';
   });
   // Key row
-  h+='<tr><td style="padding:4px 8px;font-weight:bold;">Key</td><td style="padding:4px 8px;">WFH (black)</td><td style="padding:4px 8px;color:'+green+';font-weight:bold;">WFO (green)</td><td></td><td></td><td></td></tr>';
+  h+='<tr><td style="padding:4px 8px;font-weight:bold;">Key</td><td style="padding:4px 8px;">WFH (black)</td><td style="padding:4px 8px;color:'+green+';font-weight:bold;">WFO (green)</td><td style="padding:4px 8px;color:'+otherTeamColor+';font-weight:bold;">Other team (blue)</td><td></td><td></td></tr>';
   // Leaves row
   h+='<tr><td style="padding:4px 8px;font-weight:bold;">Leaves</td>';
   for(var d3=0;d3<5;d3++){
@@ -690,20 +724,18 @@ function manageTeamHTML(){
   h+='</div>';
   h+='<div style="margin-top:8px;display:flex;flex-direction:column;gap:4px;">';
   MEMBERS.forEach(function(m){
-    var departed=!!m.leaveDate;
-    h+='<div style="display:flex;align-items:center;gap:7px;'+(departed?'opacity:.6;':'')+'">';
+    var removed=!!m.leaveDate;
+    h+='<div style="display:flex;align-items:center;gap:7px;'+(removed?'opacity:.5;':'')+'">';
     h+='<div class="avatar" style="width:22px;height:22px;font-size:9px;background:'+m.av+';color:'+m.ac+';">'+m.initials+'</div>';
     h+='<span style="font-size:12px;flex:1;">'+m.first;
     if(m.joinDate)h+=' <span style="color:var(--color-text-tertiary);font-size:10px;">(joined '+m.joinDate+')</span>';
-    if(departed)h+=' <span style="color:#B45309;font-size:10px;">(departed '+m.leaveDate+')</span>';
+    if(removed)h+=' <span style="color:#B45309;font-size:10px;">(removed '+m.leaveDate+')</span>';
     h+='</span>';
-    if(departed){
-      h+='<button style="font-size:10px;padding:2px 8px;border-radius:12px;border:0.5px solid var(--color-border-secondary);background:none;cursor:pointer;color:var(--color-text-secondary);" onclick="undoDepart(\''+m.id+'\')">Undo departure</button>';
+    h+='<button class="rm-btn" title="Edit display name" onclick="editMemberName(\''+m.id+'\')">'+ico('edit',13)+'</button>';
+    if(removed){
+      h+='<button class="add-btn" style="font-size:11px;padding:3px 10px;" onclick="reAddMember(\''+m.id+'\')">'+ico('plus',10)+' Re-add</button>';
     }else{
-      h+='<button style="font-size:10px;padding:2px 8px;border-radius:12px;border:0.5px solid var(--color-border-secondary);background:none;cursor:pointer;color:var(--color-text-secondary);" onclick="departMember(\''+m.id+'\')">Mark as departed</button>';
-      if(canHardDelete(m.id)){
-        h+='<button class="rm-btn" title="Remove (never published, no schedule history yet)" onclick="removeMemberHard(\''+m.id+'\')">'+ico('x',14)+'</button>';
-      }
+      h+='<button class="rm-btn" title="Remove from schedule" onclick="removeMember(\''+m.id+'\')">'+ico('x',14)+'</button>';
     }
     h+='</div>';
   });
@@ -766,7 +798,7 @@ function render(){
   // Grid placeholder — we'll use DOM for interactive cells
   h+='<div id="week-grid-wrap"></div><div id="compliance-section"></div>';
   // Legend
-  h+='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center;"><span class="pill wfh">'+ico('home',11)+' WFH</span><span class="pill shared">'+ico('home',11)+' Shared WFH</span><span class="pill holiday">'+ico('flag',11)+' Holiday</span><span class="pill vacation">'+ico('beach',11)+' Vacation</span><span class="pill sick">'+ico('heartoff',11)+' Sick</span><span class="pill off">'+ico('briefcase',11)+' Office</span>'+(split?'<span class="shift-badge early">10–6 early</span><span class="shift-badge late">11–7 late</span><span style="margin-left:auto;font-size:11px;color:var(--color-text-secondary);">tap badge = whole week · filled chip = day override</span>':'<span class="shift-badge early">10–6</span><span style="margin-left:auto;font-size:11px;color:var(--color-text-secondary);">11–7 split starts Jul 20</span>')+'</div>';
+  h+='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center;"><span class="pill wfh">'+ico('home',11)+' WFH</span><span class="pill shared">'+ico('home',11)+' Shared WFH</span><span class="pill holiday">'+ico('flag',11)+' Holiday</span><span class="pill vacation">'+ico('beach',11)+' Vacation</span><span class="pill sick">'+ico('heartoff',11)+' Sick</span><span class="pill otherteam">'+ico('pin',11)+' Other team</span><span class="pill off">'+ico('briefcase',11)+' Office</span>'+(split?'<span class="shift-badge early">10–6 early</span><span class="shift-badge late">11–7 late</span><span style="margin-left:auto;font-size:11px;color:var(--color-text-secondary);">tap badge = whole week · filled chip = day override</span>':'<span class="shift-badge early">10–6</span><span style="margin-left:auto;font-size:11px;color:var(--color-text-secondary);">11–7 split starts Jul 20</span>')+'</div>';
   h+='<div id="editor-section"></div><div id="holiday-section"></div><div id="vacation-section"></div><div id="manage-team-section"></div><div id="copy-section"></div><div id="teams-section"></div><div id="export-section"></div>';
   h+=changelogHTML();
   h+='<div style="margin-top:20px;padding-top:12px;border-top:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:space-between;"><span style="font-size:10px;color:var(--color-text-tertiary);">Changes auto-saved to this browser.</span><button onclick="resetState()" style="font-size:10px;color:var(--color-text-tertiary);background:none;border:none;cursor:pointer;text-decoration:underline;opacity:.6;">Reset to defaults</button></div>';
@@ -805,12 +837,12 @@ function renderWeekGrid(o,dates,sched,hols,holDays,locked,act,split,wfhPD,fmt){
     var cells=document.createElement('div');cells.className='dcells';var cellEls=[];
     for(var d=0;d<5;d++){(function(d){
       var cell=document.createElement('div');var isHol=holDays.includes(d);var pre=isPreJoin(m.id,o,d);var raw=sched[m.id][d];
-      if(pre){cell.className='cell prejoin';cell.innerHTML='<div style="font-size:13px;">–</div>';cell.title=isPostLeave(m.id,o,d)?'No longer on the team':'Not on the team yet';cells.appendChild(cell);cellEls.push(cell);return;}
+      if(pre){cell.className='cell prejoin';cell.innerHTML='<div style="font-size:13px;">–</div>';cell.title=isPostLeave(m.id,o,d)?'Not on this rotation':'Not on the team yet';cells.appendChild(cell);cellEls.push(cell);return;}
       var st=(isHol&&raw==='off')?'holiday':raw;if(st==='wfh'&&wfhPD[d]>1)st='shared';
       var cellLocked=locked&&!isHol;
       cell.className='cell '+st+(cellLocked?' locked':'');
       var iconDiv=document.createElement('div');iconDiv.innerHTML=cellIcon(st);cell.appendChild(iconDiv);
-      if(isHol){var holObj=hols.find(function(hh){return hh.day===d;});cell.title=(holObj?holObj.name:'Holiday')+' — currently: '+stLabel(st)+' — click to cycle (Holiday → Office → Home → Vacation → Sick)';}
+      if(isHol){var holObj=hols.find(function(hh){return hh.day===d;});cell.title=(holObj?holObj.name:'Holiday')+' — currently: '+stLabel(st)+' — click to cycle (Holiday → Office → Home → Vacation → Sick → Other team)';}
       else{cell.title=cellLocked?'Week is locked':stLabel(st);}
       // Day note indicator + tooltip
       var dn=getDayNote(o,m.id,d);
@@ -936,6 +968,7 @@ function renderWeekGrid(o,dates,sched,hols,holDays,locked,act,split,wfhPD,fmt){
         else if(st3==='holiday'){cBg='#7C3AED';cBd='#6D28D9';cTx='#fff';cIco='flag';}
         else if(st3==='vacation'){cBg='#D97706';cBd='#B45309';cTx='#fff';cIco='beach';}
         else if(st3==='sick'){cBg='#DC2626';cBd='#B91C1C';cTx='#fff';cIco='heartoff';}
+        else if(st3==='otherteam'){cBg='#4F46E5';cBd='#4338CA';cTx='#fff';cIco='pin';}
         else{cBg=offBg;cBd=offBd;cTx=offTx;cIco='briefcase';}
         var chipH='';var officeLike3=(st3==='off'||st3==='office');
         if(split&&isWorking(raw3)&&st3!=='holiday'){var eff3=effShift(o,m.id,d3);var es3=SHIFTS[eff3];if(es3){chipH='<div style="font-size:8px;font-weight:600;padding:1px 5px;border-radius:6px;margin-top:2px;'+(officeLike3?'background:'+es3.bg+';border:1px solid '+es3.bd+';color:'+es3.tx:'background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.3)')+';">'+es3.hr+'</div>';}}
@@ -945,7 +978,7 @@ function renderWeekGrid(o,dates,sched,hols,holDays,locked,act,split,wfhPD,fmt){
     });
     prev+='</div>';
     prev+='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;">';
-    [['#2563EB','WFH'],['#059669','Shared'],['#7C3AED','Holiday'],['#D97706','Vacation'],['#DC2626','Sick'],[offBg,'Office']].forEach(function(x){prev+='<span style="display:inline-flex;align-items:center;gap:3px;font-size:11px;color:'+txS+';"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:'+x[0]+';'+(x[0]===offBg?'border:1px solid '+offBd:'')+'"></span>'+x[1]+'</span>';});
+    [['#2563EB','WFH'],['#059669','Shared'],['#7C3AED','Holiday'],['#D97706','Vacation'],['#DC2626','Sick'],['#4F46E5','Other team'],[offBg,'Office']].forEach(function(x){prev+='<span style="display:inline-flex;align-items:center;gap:3px;font-size:11px;color:'+txS+';"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:'+x[0]+';'+(x[0]===offBg?'border:1px solid '+offBd:'')+'"></span>'+x[1]+'</span>';});
     prev+='</div></div>';
     document.getElementById('teams-section').innerHTML='<div style="margin-top:16px;border:0.5px solid #7C3AED;border-radius:12px;padding:14px;background:var(--color-background-primary);"><div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;"><div style="font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px;">'+ico('copy',14)+' Copy for Teams</div><div style="display:flex;gap:4px;"><button onclick="setTeamsDark(true)" style="font-size:10px;padding:3px 10px;border-radius:12px;border:0.5px solid '+(teamsDark?'#7C3AED':'var(--color-border-secondary)')+';cursor:pointer;color:'+(teamsDark?'#7C3AED':'var(--color-text-tertiary)')+';background:'+(teamsDark?'#EDE9FE':'var(--color-background-secondary)')+';font-weight:'+(teamsDark?'500':'400')+';">Dark</button><button onclick="setTeamsDark(false)" style="font-size:10px;padding:3px 10px;border-radius:12px;border:0.5px solid '+(!teamsDark?'#7C3AED':'var(--color-border-secondary)')+';cursor:pointer;color:'+(!teamsDark?'#7C3AED':'var(--color-text-tertiary)')+';background:'+(!teamsDark?'#EDE9FE':'var(--color-background-secondary)')+';font-weight:'+(!teamsDark?'500':'400')+';">Light</button></div></div><div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:8px;">Copies as an <strong>image</strong> \u2014 paste directly into Teams (Ctrl+V). Falls back to PNG download if clipboard fails.</div><div id="teams-preview" style="border-radius:10px;overflow:hidden;">'+prev+'</div><div style="display:flex;justify-content:flex-end;margin-top:8px;"><button id="teams-btn" onclick="copyTeamsImage()" style="background:#5B21B6;border:1.5px solid #4C1D95;color:#fff;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:5px;">'+ico('copy',12)+' Select for copy</button></div></div>';
   }
@@ -963,7 +996,7 @@ function renderWeekGrid(o,dates,sched,hols,holDays,locked,act,split,wfhPD,fmt){
     var noteKey='note_'+wkKey(o)+'_'+m.id,noteVal=notes[noteKey]||'';
     rows+='<tr><td style="padding:8px 6px 8px 12px;border-bottom:1px solid #F3F4F6;'+(ri%2===1?'background:#FAFAFA;':'')+'"><div style="display:flex;align-items:center;gap:7px;"><div style="width:28px;height:28px;border-radius:50%;background:'+m.av+';color:'+m.ac+';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;">'+m.initials+'</div><div><div style="font-size:12px;font-weight:'+(m.id==='alan'?'600':'400')+';color:#111827;">'+m.first+'</div>'+(noteVal?'<div style="font-size:10px;color:#9CA3AF;margin-top:1px;">'+noteVal+'</div>':'')+'</div></div></td>'+cells+'<td style="padding:6px;text-align:center;border-bottom:1px solid #F3F4F6;'+(ri%2===1?'background:#FAFAFA;':'')+'"><span style="background:'+ocBg+';color:'+ocColor+';font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;">'+oc2+'/'+effM2+'</span></td></tr>';});
     var wkNoteKey='note_week_'+wkKey(o),wkNoteVal=notes[wkNoteKey]||'';
-    var legendItems=[['#2563EB','WFH'],['#059669','Shared WFH'],['#7C3AED','Holiday'],['#D97706','Vacation'],['#DC2626','Sick'],['#F3F4F6','Office']].map(function(x){return'<span style="font-size:11px;color:#6B7280;display:flex;align-items:center;gap:4px;"><i style="width:10px;height:10px;border-radius:2px;background:'+x[0]+';border:'+(x[0]==='#F3F4F6'?'1px solid #E5E7EB':'none')+';display:inline-block;"></i>'+x[1]+'</span>';}).join('');
+    var legendItems=[['#2563EB','WFH'],['#059669','Shared WFH'],['#7C3AED','Holiday'],['#D97706','Vacation'],['#DC2626','Sick'],['#4F46E5','Other team'],['#F3F4F6','Office']].map(function(x){return'<span style="font-size:11px;color:#6B7280;display:flex;align-items:center;gap:4px;"><i style="width:10px;height:10px;border-radius:2px;background:'+x[0]+';border:'+(x[0]==='#F3F4F6'?'1px solid #E5E7EB':'none')+';display:inline-block;"></i>'+x[1]+'</span>';}).join('');
     document.getElementById('export-section').innerHTML='<div style="margin-top:16px;"><div style="font-size:13px;font-weight:500;margin-bottom:8px;display:flex;align-items:center;gap:6px;">'+ico('camera',14)+' Screenshot this card to share</div><div class="export-card"><div class="export-card-header"><div style="font-size:14px;font-weight:600;color:#111827;">'+title+'</div><div style="font-size:11px;color:#9CA3AF;margin-top:2px;">3-day mandate · '+(split?'shift shown per day (10–6 / 11–7)':'single 10–6 shift')+(wkNoteVal?' · '+wkNoteVal:'')+'</div></div><table class="export-table"><thead><tr>'+ths+'</tr></thead><tbody>'+rows+'</tbody></table><div style="display:flex;gap:12px;flex-wrap:wrap;padding:10px 20px;background:#F9FAFB;border-top:1px solid #E5E7EB;">'+legendItems+(split?'<span style="font-size:11px;color:#6B7280;">· <strong>10–6</strong> early · <strong>11–7</strong> late</span>':'')+'</div></div></div>';
   }
 }
@@ -983,7 +1016,7 @@ function renderMonthView(){
   h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem;"><div class="stat"><div class="stat-n">'+wkOffs.length+'</div><div class="stat-l">Weeks</div></div><div class="stat"><div class="stat-n">'+totalAway+'</div><div class="stat-l">Away days</div></div><div class="stat"><div class="stat-n" style="color:'+(ncM>0?'#791F1F':'#27500A')+';">'+(mMems.length-ncM)+'/'+mMems.length+'</div><div class="stat-l">Meeting mandate</div></div><div class="stat"><div class="stat-n">—</div><div class="stat-l"></div></div></div>';
 
   h+='<div id="month-blocks"></div>';
-  h+='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center;"><span class="pill wfh">'+ico('home',11)+' WFH</span><span class="pill holiday">'+ico('flag',11)+' Holiday</span><span class="pill vacation">'+ico('beach',11)+' Vacation</span><span class="pill sick">'+ico('heartoff',11)+' Sick</span><span class="pill off">'+ico('briefcase',11)+' Office</span></div>';
+  h+='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center;"><span class="pill wfh">'+ico('home',11)+' WFH</span><span class="pill holiday">'+ico('flag',11)+' Holiday</span><span class="pill vacation">'+ico('beach',11)+' Vacation</span><span class="pill sick">'+ico('heartoff',11)+' Sick</span><span class="pill otherteam">'+ico('pin',11)+' Other team</span><span class="pill off">'+ico('briefcase',11)+' Office</span></div>';
   app.innerHTML=h;
 
   var mv=document.getElementById('month-blocks');
