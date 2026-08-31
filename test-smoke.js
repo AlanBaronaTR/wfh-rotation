@@ -979,13 +979,104 @@ function makeSandbox() {
 })();
 
 // ===========================================================================
-// Summary
+// 13. Direct-to-file publish (File System Access API) with graceful fallback.
+//     Runs async (real awaits), so the Summary print/exit is chained after it
+//     resolves rather than running as plain top-level code.
 // ===========================================================================
-console.log('\n' + passes + ' passed, ' + failures + ' failed.');
-if (failures > 0) {
-  console.log('\ntest-smoke.js FAILED — do not publish/push until this is green.');
-  process.exit(1);
-} else {
-  console.log('\ntest-smoke.js PASSED.');
-  process.exit(0);
+function makeFakeHandle(mode) {
+  // mode: 'granted' | 'prompt-then-granted' | 'denied'
+  const writes = [];
+  return {
+    _writes: writes,
+    async queryPermission() { return mode === 'granted' ? 'granted' : 'prompt'; },
+    async requestPermission() { return mode === 'prompt-then-granted' ? 'granted' : 'denied'; },
+    async createWritable() {
+      return { async write(data) { writes.push(data); }, async close() {} };
+    },
+  };
 }
+
+(async function directFilePublishChecks() {
+  // ---- verifyHandlePermission ----
+  const g0 = makeSandbox();
+  check('verifyHandlePermission is true when already granted', await g0.verifyHandlePermission(makeFakeHandle('granted')) === true);
+  check('verifyHandlePermission is true when prompt then granted', await g0.verifyHandlePermission(makeFakeHandle('prompt-then-granted')) === true);
+  check('verifyHandlePermission is false when denied', await g0.verifyHandlePermission(makeFakeHandle('denied')) === false);
+
+  // ---- Direct write succeeds: no download, stamps committed, handle cached for next time ----
+  const g1 = makeSandbox();
+  let pickerCalls = 0;
+  const handle1 = makeFakeHandle('granted');
+  g1.window.showSaveFilePicker = async () => { pickerCalls++; return handle1; };
+  g1.prompt = () => 'direct write test';
+  const beforeLog1 = g1.publishLog.length;
+  try { await g1.publishData(); } catch (e) { check('publishData() (direct write) does not throw', false, e.stack); }
+  check('direct write: file picker was called exactly once (first publish)', pickerCalls === 1);
+  check('direct write: the exported JSON was actually written to the handle', handle1._writes.length === 1 && JSON.parse(handle1._writes[0]).publishedAt === g1.lastPublishedAt);
+  check('direct write: publishLog was committed', g1.publishLog.length === beforeLog1 + 1);
+  check('direct write: unpublished-changes baseline updated (banner clears)', g1.hasUnpublishedChanges() === false);
+
+  // Publishing again must reuse the cached handle, NOT re-prompt the picker.
+  g1.prompt = () => 'second publish';
+  await g1.publishData();
+  check('direct write: second publish reuses the cached handle (picker not called again)', pickerCalls === 1);
+  check('direct write: second publish wrote again', handle1._writes.length === 2);
+
+  // ---- Cancelling the file picker (AbortError) aborts the publish entirely ----
+  const g2 = makeSandbox();
+  const abortErr = new Error('cancelled'); abortErr.name = 'AbortError';
+  g2.window.showSaveFilePicker = async () => { throw abortErr; };
+  g2.prompt = () => 'should not be published';
+  const beforeAt2 = g2.lastPublishedAt, beforeLog2 = g2.publishLog.length;
+  try { await g2.publishData(); } catch (e) { check('publishData() cancel path does not throw', false, e.stack); }
+  check('cancelling the file picker leaves lastPublishedAt untouched', g2.lastPublishedAt === beforeAt2);
+  check('cancelling the file picker does not add a changelog entry', g2.publishLog.length === beforeLog2);
+
+  // ---- A non-cancel write failure falls back to download AND still commits the publish ----
+  const g3 = makeSandbox();
+  g3.window.showSaveFilePicker = async () => ({
+    async queryPermission() { return 'granted'; },
+    async createWritable() { throw new Error('disk full'); },
+  });
+  g3.prompt = () => 'fallback test';
+  let downloadTriggered = false;
+  const origCreateElement = g3.document.createElement;
+  g3.document.createElement = function (tag) {
+    const el = origCreateElement(tag);
+    const origClick = el.click.bind(el);
+    el.click = function () { if (el.download === 'data.json') downloadTriggered = true; origClick(); };
+    return el;
+  };
+  try { await g3.publishData(); } catch (e) { check('publishData() write-failure fallback does not throw', false, e.stack); }
+  check('a non-cancel write failure falls back to the classic download', downloadTriggered === true);
+  check('a non-cancel write failure still commits the publish (timestamp/changelog)', !!g3.lastPublishedAt && g3.publishLog.length === 1);
+
+  // ---- Unsupported browser (no showSaveFilePicker) uses the classic download, unchanged ----
+  const g4 = makeSandbox(); // makeSandbox() never sets window.showSaveFilePicker
+  check('unsupported-browser sandbox has no showSaveFilePicker', !g4.window.showSaveFilePicker);
+  g4.prompt = () => 'plain download';
+  try { await g4.publishData(); } catch (e) { check('publishData() unsupported-browser path does not throw', false, e.stack); }
+  check('unsupported browser still successfully publishes (fallback path)', !!g4.lastPublishedAt);
+
+  // ---- resetPublishFileHandle ----
+  const g5 = makeSandbox();
+  g5.PUBLISH_FILE_HANDLE = makeFakeHandle('granted');
+  g5.confirm = () => false;
+  g5.resetPublishFileHandle();
+  check('resetPublishFileHandle does nothing if the confirm is declined', g5.PUBLISH_FILE_HANDLE !== null);
+  g5.confirm = () => true;
+  g5.resetPublishFileHandle();
+  check('resetPublishFileHandle clears the cached handle when confirmed', g5.PUBLISH_FILE_HANDLE === null);
+
+  // ===========================================================================
+  // Summary
+  // ===========================================================================
+  console.log('\n' + passes + ' passed, ' + failures + ' failed.');
+  if (failures > 0) {
+    console.log('\ntest-smoke.js FAILED — do not publish/push until this is green.');
+    process.exit(1);
+  } else {
+    console.log('\ntest-smoke.js PASSED.');
+    process.exit(0);
+  }
+})();

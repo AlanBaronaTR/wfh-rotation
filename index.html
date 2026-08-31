@@ -226,20 +226,121 @@ var REMOTE_LOADED=false;
 // that has never been published yet is eligible — a real, already-published teammate should
 // never be hard-deletable just because they happen to have an all-default schedule so far.
 var PUBLISHED_MEMBER_IDS=new Set();
-function publishData(){
+// ===== DIRECT-TO-FILE PUBLISH (File System Access API, Chromium only) =====
+// Lets Publish remember one specific data.json file (picked once) and write straight to it on
+// every later click, instead of always dropping a new download into the Downloads folder. Falls
+// back to the classic download in any browser/context that doesn't support it, or if anything
+// about the direct write fails.
+var PUBLISH_FILE_HANDLE=null;
+var PUBLISH_DB_NAME='wfh_rotation_fs',PUBLISH_STORE='handles',PUBLISH_HANDLE_KEY='dataJsonFile';
+function openPublishDB(){
+  return new Promise(function(resolve,reject){
+    var req=indexedDB.open(PUBLISH_DB_NAME,1);
+    req.onupgradeneeded=function(){req.result.createObjectStore(PUBLISH_STORE);};
+    req.onsuccess=function(){resolve(req.result);};
+    req.onerror=function(){reject(req.error);};
+  });
+}
+function loadStoredFileHandle(){
+  if(typeof indexedDB==='undefined')return Promise.resolve(null);
+  return openPublishDB().then(function(db){
+    return new Promise(function(resolve,reject){
+      var tx=db.transaction(PUBLISH_STORE,'readonly');
+      var req=tx.objectStore(PUBLISH_STORE).get(PUBLISH_HANDLE_KEY);
+      req.onsuccess=function(){resolve(req.result||null);};
+      req.onerror=function(){reject(req.error);};
+    });
+  }).catch(function(){return null;});
+}
+function saveStoredFileHandle(handle){
+  if(typeof indexedDB==='undefined')return Promise.resolve();
+  return openPublishDB().then(function(db){
+    return new Promise(function(resolve,reject){
+      var tx=db.transaction(PUBLISH_STORE,'readwrite');
+      tx.objectStore(PUBLISH_STORE).put(handle,PUBLISH_HANDLE_KEY);
+      tx.oncomplete=function(){resolve();};
+      tx.onerror=function(){reject(tx.error);};
+    });
+  }).catch(function(){});
+}
+function clearStoredFileHandle(){
+  if(typeof indexedDB==='undefined')return Promise.resolve();
+  return openPublishDB().then(function(db){
+    return new Promise(function(resolve){
+      var tx=db.transaction(PUBLISH_STORE,'readwrite');
+      tx.objectStore(PUBLISH_STORE).delete(PUBLISH_HANDLE_KEY);
+      tx.oncomplete=function(){resolve();};
+      tx.onerror=function(){resolve();};
+    });
+  }).catch(function(){});
+}
+async function verifyHandlePermission(handle){
+  try{
+    var opts={mode:'readwrite'};
+    if((await handle.queryPermission(opts))==='granted')return true;
+    if((await handle.requestPermission(opts))==='granted')return true;
+    return false;
+  }catch(e){return false;}
+}
+// Returns a usable, write-permitted file handle — the remembered one if possible, otherwise
+// prompts (via the browser's native Save dialog) to pick/create one and remembers it for next time.
+async function getPublishFileHandle(){
+  if(PUBLISH_FILE_HANDLE){
+    if(await verifyHandlePermission(PUBLISH_FILE_HANDLE))return PUBLISH_FILE_HANDLE;
+    PUBLISH_FILE_HANDLE=null;
+  }
+  var stored=await loadStoredFileHandle();
+  if(stored&&await verifyHandlePermission(stored)){
+    PUBLISH_FILE_HANDLE=stored;
+    return stored;
+  }
+  var handle=await window.showSaveFilePicker({suggestedName:'data.json',types:[{description:'JSON file',accept:{'application/json':['.json']}}]});
+  await saveStoredFileHandle(handle);
+  PUBLISH_FILE_HANDLE=handle;
+  return handle;
+}
+function resetPublishFileHandle(){
+  if(!confirm('Forget the remembered publish file? The next Publish will ask you to choose the file again.'))return;
+  PUBLISH_FILE_HANDLE=null;
+  clearStoredFileHandle();
+  alert('Forgotten — the next Publish will ask you to choose the file again.');
+}
+async function publishData(){
   var note=prompt('Optional: short note describing what changed in this publish (leave blank to skip):','');
   if(note===null)return;
-  lastPublishedAt=new Date().toISOString();
-  publishLog.push({at:lastPublishedAt,note:note.trim()});
-  if(publishLog.length>20)publishLog=publishLog.slice(-20);
-  var data=JSON.stringify(exportState(),null,2);
-  var blob=new Blob([data],{type:'application/json'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');a.href=url;a.download='data.json';document.body.appendChild(a);a.click();document.body.removeChild(a);
-  setTimeout(function(){URL.revokeObjectURL(url);},1000);
+  var newPublishedAt=new Date().toISOString();
+  var newPublishLog=publishLog.concat([{at:newPublishedAt,note:note.trim()}]);
+  if(newPublishLog.length>20)newPublishLog=newPublishLog.slice(-20);
+  var exported=exportState();
+  exported.publishedAt=newPublishedAt;
+  exported.publishLog=newPublishLog;
+  var data=JSON.stringify(exported,null,2);
+
+  var wroteDirectly=false;
+  if(window.showSaveFilePicker){
+    try{
+      var handle=await getPublishFileHandle();
+      var writable=await handle.createWritable();
+      await writable.write(data);
+      await writable.close();
+      wroteDirectly=true;
+    }catch(e){
+      if(e&&e.name==='AbortError')return; // user cancelled the file picker/permission prompt -> abort publish entirely
+      console.warn('Direct file write failed, falling back to download:',e);
+    }
+  }
+  if(!wroteDirectly){
+    var blob=new Blob([data],{type:'application/json'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');a.href=url;a.download='data.json';document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(function(){URL.revokeObjectURL(url);},1000);
+  }
+  lastPublishedAt=newPublishedAt;
+  publishLog=newPublishLog;
   UNPUBLISHED_BASELINE=dataFingerprint();
   PUBLISHED_MEMBER_IDS=new Set(MEMBERS.map(function(m){return m.id;}));
   render();
+  alert(wroteDirectly?'Published — data.json updated directly on disk. Just commit + push in git.':'Published — data.json downloaded. Move it into the repo folder, then commit + push.');
 }
 function formatPublishedAt(iso){if(!iso)return'never published';try{return new Date(iso).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'});}catch(e){return iso;}}
 function importData(){
@@ -791,7 +892,7 @@ function render(){
   // Nav + toolbar
   var canUndo=undoStack.length>0&&undoStack[undoStack.length-1].o===wkOffset;
   h+='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:1rem;"><div style="display:flex;align-items:center;gap:8px;"><button class="nav-btn" onclick="navBack()">'+ico('left',14)+'</button><span style="font-size:13px;font-weight:500;min-width:180px;text-align:center;">'+fmt.format(dates[0])+' – '+fmt.format(dates[4])+'</span><button class="nav-btn" onclick="navFwd()">'+ico('right',14)+'</button></div>';
-  if(view==='week'){h+='<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><button onclick="undo()" title="Undo" style="background:none;border:0.5px solid var(--color-border-secondary);border-radius:8px;padding:5px 9px;cursor:pointer;color:'+(canUndo?'var(--color-text-primary)':'var(--color-text-tertiary)')+';font-size:13px;" '+(canUndo?'':'disabled')+'>'+ico('undo',14)+'</button><button onclick="toggleLock()" style="background:'+(locked?'#F3F4F6':'none')+';border:0.5px solid var(--color-border-secondary);border-radius:8px;padding:5px 9px;cursor:pointer;color:'+(locked?'#374151':'var(--color-text-secondary)')+';font-size:13px;display:inline-flex;align-items:center;gap:4px;">'+ico(locked?'lock':'lockopen',14)+'<span style="font-size:12px;">'+(locked?'Locked':'Lock')+'</span></button><button onclick="toggleCopy()" style="background:'+(showCopy?'#0C447C':'none')+';border:0.5px solid #378ADD;color:'+(showCopy?'#fff':'#0C447C')+';border-radius:8px;padding:5px 10px;cursor:pointer;font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:5px;">'+ico('tblexport',12)+'Copy for Excel</button><button onclick="toggleTeams()" style="background:'+(showTeams?'#4C1D95':'none')+';border:0.5px solid #7C3AED;color:'+(showTeams?'#fff':'#5B21B6')+';border-radius:8px;padding:5px 10px;cursor:pointer;font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:5px;">'+ico('copy',12)+'Copy for Teams</button><button onclick="importData()" title="Restore data from an old export or old localStorage" style="background:none;border:0.5px solid var(--color-border-secondary);color:var(--color-text-primary);border-radius:8px;padding:5px 10px;cursor:pointer;font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:5px;">Import</button><button onclick="publishData()" title="Download data.json to commit \u2014 this is what everyone else sees" style="background:#059669;border:1.5px solid #047857;color:#fff;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:5px;">'+ico('refresh',12)+'Publish</button><button onclick="toggleExport()" style="background:#2563EB;border:1.5px solid #1D4ED8;color:#fff;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:5px;">'+ico('camera',12)+(showExport?'Hide':'Screenshot')+'</button></div>';}
+  if(view==='week'){h+='<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><button onclick="undo()" title="Undo" style="background:none;border:0.5px solid var(--color-border-secondary);border-radius:8px;padding:5px 9px;cursor:pointer;color:'+(canUndo?'var(--color-text-primary)':'var(--color-text-tertiary)')+';font-size:13px;" '+(canUndo?'':'disabled')+'>'+ico('undo',14)+'</button><button onclick="toggleLock()" style="background:'+(locked?'#F3F4F6':'none')+';border:0.5px solid var(--color-border-secondary);border-radius:8px;padding:5px 9px;cursor:pointer;color:'+(locked?'#374151':'var(--color-text-secondary)')+';font-size:13px;display:inline-flex;align-items:center;gap:4px;">'+ico(locked?'lock':'lockopen',14)+'<span style="font-size:12px;">'+(locked?'Locked':'Lock')+'</span></button><button onclick="toggleCopy()" style="background:'+(showCopy?'#0C447C':'none')+';border:0.5px solid #378ADD;color:'+(showCopy?'#fff':'#0C447C')+';border-radius:8px;padding:5px 10px;cursor:pointer;font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:5px;">'+ico('tblexport',12)+'Copy for Excel</button><button onclick="toggleTeams()" style="background:'+(showTeams?'#4C1D95':'none')+';border:0.5px solid #7C3AED;color:'+(showTeams?'#fff':'#5B21B6')+';border-radius:8px;padding:5px 10px;cursor:pointer;font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:5px;">'+ico('copy',12)+'Copy for Teams</button><button onclick="importData()" title="Restore data from an old export or old localStorage" style="background:none;border:0.5px solid var(--color-border-secondary);color:var(--color-text-primary);border-radius:8px;padding:5px 10px;cursor:pointer;font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:5px;">Import</button><button onclick="publishData()" title="Publish data.json \u2014 writes directly to your chosen file in supported browsers, otherwise downloads it" style="background:#059669;border:1.5px solid #047857;color:#fff;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:5px;">'+ico('refresh',12)+'Publish</button><button onclick="toggleExport()" style="background:#2563EB;border:1.5px solid #1D4ED8;color:#fff;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:5px;">'+ico('camera',12)+(showExport?'Hide':'Screenshot')+'</button></div>';}
   h+='</div>';
 
   if(view==='week'){
@@ -841,7 +942,7 @@ function render(){
   h+='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center;"><span class="pill wfh">'+ico('home',11)+' WFH</span><span class="pill shared">'+ico('home',11)+' Shared WFH</span><span class="pill holiday">'+ico('flag',11)+' Holiday</span><span class="pill vacation">'+ico('beach',11)+' Vacation</span><span class="pill sick">'+ico('heartoff',11)+' Sick</span><span class="pill otherteam">'+ico('pin',11)+' Other team</span><span class="pill off">'+ico('briefcase',11)+' Office</span>'+(split?'<span class="shift-badge early">10–6 early</span><span class="shift-badge late">11–7 late</span><span style="margin-left:auto;font-size:11px;color:var(--color-text-secondary);">tap badge = whole week · filled chip = day override</span>':'<span class="shift-badge early">10–6</span><span style="margin-left:auto;font-size:11px;color:var(--color-text-secondary);">11–7 split starts Jul 20</span>')+'</div>';
   h+='<div id="editor-section"></div><div id="holiday-section"></div><div id="vacation-section"></div><div id="manage-team-section"></div><div id="copy-section"></div><div id="teams-section"></div><div id="export-section"></div>';
   h+=changelogHTML();
-  h+='<div style="margin-top:20px;padding-top:12px;border-top:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:space-between;"><span style="font-size:10px;color:var(--color-text-tertiary);">Changes auto-saved to this browser.</span><button onclick="resetState()" style="font-size:10px;color:var(--color-text-tertiary);background:none;border:none;cursor:pointer;text-decoration:underline;opacity:.6;">Reset to defaults</button></div>';
+  h+='<div style="margin-top:20px;padding-top:12px;border-top:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;"><span style="font-size:10px;color:var(--color-text-tertiary);">Changes auto-saved to this browser.</span><span style="display:flex;gap:12px;">'+(window.showSaveFilePicker?'<button onclick="resetPublishFileHandle()" style="font-size:10px;color:var(--color-text-tertiary);background:none;border:none;cursor:pointer;text-decoration:underline;opacity:.6;">Change publish file location</button>':'')+'<button onclick="resetState()" style="font-size:10px;color:var(--color-text-tertiary);background:none;border:none;cursor:pointer;text-decoration:underline;opacity:.6;">Reset to defaults</button></span></div>';
 
   document.getElementById('app').innerHTML=h;
 
