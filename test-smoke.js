@@ -1231,6 +1231,31 @@ function makeFakeHandle(mode) {
   check("a stale local skeleton from before the colleague's publish must not erase their real vacation day", g8.schedule[wk7].karen[0] === 'vacation');
 
   // ===========================================================================
+  // 16. Unlocking a week must survive a reload (TODO.md #3). applyState()'s
+  //     lockedWeeks handling only ever ADDED weeks from incoming state into
+  //     the existing Set, so an explicit unlock could never actually stick:
+  //     on the next boot, bootAndRender() applies the (still-locked) remote
+  //     state before this browser's own saved (unlocked) state, and an
+  //     add-only merge has no way to remove what remote just added back in.
+  // ===========================================================================
+  const g9 = makeSandbox();
+  const wkLock = g9.wkKey(-5);
+  g9.applyState({ lockedWeeks: [wkLock] }); // currently-published data.json has this week locked
+  check('remote publish locks the week as expected', g9.lockedWeeks.has(wkLock));
+
+  g9.wkOffset = -5;
+  g9.toggleLock(); // this browser explicitly unlocks it
+  check('toggleLock() unlocks the week locally', !g9.lockedWeeks.has(wkLock));
+  const exportedLock = g9.exportState();
+  check('the unlock is correctly excluded from the saved local state', !exportedLock.lockedWeeks.includes(wkLock));
+
+  const g10 = makeSandbox();
+  g10.applyState({ lockedWeeks: [wkLock] }); // still-published (not yet republished with the unlock)
+  check('the freshly-fetched remote lock is visible before local state is applied', g10.lockedWeeks.has(wkLock));
+  g10.applyState(exportedLock); // this browser's own saved state, re-applied exactly like loadState() does
+  check('an explicit local unlock must survive being merged with the still-locked remote state', !g10.lockedWeeks.has(wkLock));
+
+  // ===========================================================================
   // Summary
   // ===========================================================================
   console.log('\n' + passes + ' passed, ' + failures + ' failed.');

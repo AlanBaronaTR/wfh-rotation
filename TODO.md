@@ -48,10 +48,15 @@ Fixed 2026-08-31: `exportState()`'s `schedule` field now goes through
 banner) instead of the raw live object, so an all-`'off'` week that's only ever
 been viewed — never edited — is never saved or published.
 
-### - [ ] 3. Unlocking a week never survives a reload
+### - [x] 3. Unlocking a week never survives a reload
 
 `lockedWeeks` in `applyState` (~L205) is add-only. Make lock state authoritative
 from the published file.
+
+Fixed 2026-08-31: `applyState`'s `lockedWeeks` handling now replaces the Set
+wholesale (`lockedWeeks=new Set(state.lockedWeeks)`), same as `vacationLog`/
+`MEMBERS`, instead of only ever adding to it. Remote sets the baseline; local
+(if present) authoritatively overrides it with this browser's own saved state.
 
 ### - [ ] 4. `buildSuggestion` erases leave for next week
 
