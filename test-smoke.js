@@ -1198,6 +1198,39 @@ function makeFakeHandle(mode) {
   check('a bfcache-restored pageshow re-renders without throwing', capturedHTML.length > 0);
 
   // ===========================================================================
+  // 15. A stale, lazily-created all-'off' week sitting in this browser's own
+  //     saved state must not overwrite a colleague's freshly-published real
+  //     data for that same week (TODO.md #2 — data-loss bug).
+  //
+  //     Repro sequence: this browser once viewed a week before anyone had
+  //     published real data for it, so getSched() lazily filled it with an
+  //     all-'off' skeleton and a subsequent render()->saveState() persisted
+  //     it. Later, a colleague published real data for that same week. On
+  //     this browser's next boot, bootAndRender() applies the fetched remote
+  //     state first, then loadState() re-applies this browser's own saved
+  //     state on top -- if that saved state still carries the stale
+  //     skeleton, it silently clobbers the real data that was just fetched.
+  // ===========================================================================
+  const g7 = makeSandbox();
+  const o7 = 20;
+  const wk7 = g7.wkKey(o7);
+  g7.getSched(o7); // merely viewing the week, before anyone published real data for it
+  const exported7 = g7.exportState();
+  check('a lazily-created all-off week is not included in the saved/published state', !exported7.schedule[wk7]);
+
+  const remoteWeek7 = {};
+  g7.MEMBERS.forEach((m) => { remoteWeek7[m.id] = Array(5).fill('off'); });
+  remoteWeek7.karen[0] = 'vacation'; // a colleague's real, since-published data
+  const remoteState7 = { schedule: {} };
+  remoteState7.schedule[wk7] = remoteWeek7;
+
+  const g8 = makeSandbox();
+  g8.applyState(remoteState7);
+  check('the freshly-fetched published data is visible before local state is applied', g8.schedule[wk7].karen[0] === 'vacation');
+  g8.applyState(exported7); // this browser's own saved state, re-applied exactly like loadState() does
+  check("a stale local skeleton from before the colleague's publish must not erase their real vacation day", g8.schedule[wk7].karen[0] === 'vacation');
+
+  // ===========================================================================
   // Summary
   // ===========================================================================
   console.log('\n' + passes + ' passed, ' + failures + ' failed.');
